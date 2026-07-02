@@ -1,5 +1,13 @@
 """Импорт всех моделей — чтобы Base.metadata был полным (для Alembic и тестов)."""
+from app.models.content import Course, CourseLanguage, Lesson, Level, LevelName, Module
 from app.models.group import Group, GroupMember
+from app.models.quiz import (
+    LessonProgress,
+    LessonQuestion,
+    ProgressStatus,
+    Question,
+    QuestionType,
+)
 from app.models.token import (
     EmailVerificationToken,
     PasswordResetToken,
@@ -17,4 +25,15 @@ __all__ = [
     "PasswordResetToken",
     "Group",
     "GroupMember",
+    "Course",
+    "CourseLanguage",
+    "Level",
+    "LevelName",
+    "Module",
+    "Lesson",
+    "Question",
+    "QuestionType",
+    "LessonQuestion",
+    "LessonProgress",
+    "ProgressStatus",
 ]

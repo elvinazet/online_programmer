@@ -39,3 +39,32 @@ def db():
         yield session
     finally:
         session.close()
+
+
+@pytest.fixture
+def register_verify_login(client, db):
+    """Хелпер: регистрирует, подтверждает email и логинит пользователя.
+
+    Возвращает тело ответа /login (access_token, refresh_token).
+    """
+    from sqlalchemy import select
+
+    from app.models.token import EmailVerificationToken
+    from app.models.user import User
+
+    def _make(email, password="password123", role="student", **extra):
+        resp = client.post(
+            "/api/auth/register",
+            json={"email": email, "password": password, "role": role, **extra},
+        )
+        assert resp.status_code == 201, resp.text
+        user = db.scalar(select(User).where(User.email == email))
+        token = db.scalar(
+            select(EmailVerificationToken).where(EmailVerificationToken.user_id == user.id)
+        ).token
+        assert client.post("/api/auth/verify-email", json={"token": token}).status_code == 200
+        login = client.post("/api/auth/login", json={"email": email, "password": password})
+        assert login.status_code == 200, login.text
+        return login.json()
+
+    return _make
