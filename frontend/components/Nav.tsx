@@ -15,9 +15,17 @@ export default function Nav() {
           Online Programmer
         </Link>
         {user && (
-          <Link href="/" className="text-sm text-slate-600 hover:text-slate-900">
-            Курсы
-          </Link>
+          <>
+            <Link href="/" className="text-sm text-slate-600 hover:text-slate-900">
+              Курсы
+            </Link>
+            <Link href="/problems" className="text-sm text-slate-600 hover:text-slate-900">
+              Задачи
+            </Link>
+            <Link href="/me" className="text-sm text-slate-600 hover:text-slate-900">
+              Профиль
+            </Link>
+          </>
         )}
         {user?.role === "teacher" && (
           <Link href="/teach" className="text-sm text-slate-600 hover:text-slate-900">

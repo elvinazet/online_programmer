@@ -81,3 +81,56 @@ export interface QuizResult {
   status: ProgressStatus;
   results: QuizResultItem[];
 }
+
+export type SubmissionStatus =
+  | "queued"
+  | "running"
+  | "accepted"
+  | "wrong_answer"
+  | "tle"
+  | "mle"
+  | "runtime_error"
+  | "compile_error";
+
+export interface Problem {
+  id: number;
+  source: "codeforces" | "authored";
+  title: string;
+  rating?: number | null;
+  url?: string | null;
+  cf_contest_id?: number | null;
+  cf_index?: string | null;
+  tags: string[];
+  solved: boolean;
+}
+
+export interface SampleTest {
+  input: string;
+  expected_output: string;
+}
+
+export interface ProblemDetail extends Problem {
+  statement_md?: string | null;
+  time_limit_ms: number;
+  memory_limit_mb: number;
+  samples: SampleTest[];
+}
+
+export interface Submission {
+  id: number;
+  problem_id: number;
+  language: "cpp" | "python";
+  status: SubmissionStatus;
+  passed_tests: number;
+  total_tests: number;
+  score: number;
+  time_ms?: number | null;
+  compile_output?: string | null;
+  created_at: string;
+}
+
+export interface Stats {
+  solved_total: number;
+  by_rating: Record<string, number>;
+  by_tag: Record<string, number>;
+}
