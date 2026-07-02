@@ -8,6 +8,9 @@ _DB_PATH = pathlib.Path(tempfile.gettempdir()) / "op_test.db"
 os.environ["DATABASE_URL"] = f"sqlite:///{_DB_PATH}"
 os.environ.setdefault("JWT_SECRET", "test-secret")
 os.environ.setdefault("EMAIL_BACKEND", "console")
+# Судим синхронно локальным исполнителем — без Docker/Celery/Redis.
+os.environ.setdefault("JUDGE_INLINE", "true")
+os.environ.setdefault("JUDGE_BACKEND", "local")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

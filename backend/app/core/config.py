@@ -34,6 +34,25 @@ class Settings(BaseSettings):
     smtp_user: str = ""
     smtp_password: str = ""
 
+    # Codeforces
+    cf_api_base: str = "https://codeforces.com/api"
+    cf_rate_limit_ms: int = 2000  # не чаще 1 запроса в 2 секунды (глобально)
+
+    # Celery (по умолчанию использует Redis)
+    celery_broker_url: str = ""
+
+    # Judge / sandbox
+    judge_backend: str = "docker"  # docker | local
+    judge_inline: bool = False  # True — судить синхронно в API (dev/тесты, без Celery)
+    judge_default_time_limit_ms: int = 2000
+    judge_default_memory_mb: int = 256
+    sandbox_image_python: str = "op-sandbox-python"
+    sandbox_image_cpp: str = "op-sandbox-cpp"
+
+    @property
+    def broker_url(self) -> str:
+        return self.celery_broker_url or self.redis_url
+
 
 @lru_cache
 def get_settings() -> Settings:

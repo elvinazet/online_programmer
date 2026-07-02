@@ -36,5 +36,35 @@ services:
     ports:
       - "8000:8000"
 
+  # Celery worker: проверка сабмитов (judge) + опрос Codeforces.
+  # ВАЖНО: для judge через Docker нужно собрать sandbox-образы заранее:
+  #   bash backend/sandbox/build.sh
+  # Воркеру проброшен docker.sock — он запускает эфемерные sandbox-контейнеры.
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    command: celery -A app.workers.celery_app:celery_app worker --loglevel=info
+    env_file: .env
+    environment:
+      JUDGE_BACKEND: docker
+      JUDGE_INLINE: "false"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Celery beat: расписание (опрос CF каждые 5 минут).
+  beat:
+    build: ./backend
+    command: celery -A app.workers.celery_app:celery_app beat --loglevel=info
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+
 volumes:
   pgdata:

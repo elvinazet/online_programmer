@@ -1,12 +1,21 @@
 """Импорт всех моделей — чтобы Base.metadata был полным (для Alembic и тестов)."""
 from app.models.content import Course, CourseLanguage, Lesson, Level, LevelName, Module
 from app.models.group import Group, GroupMember
+from app.models.problem import Problem, ProblemSource, ProblemTag, ProblemTest
 from app.models.quiz import (
     LessonProgress,
     LessonQuestion,
     ProgressStatus,
     Question,
     QuestionType,
+)
+from app.models.submission import (
+    CfSyncState,
+    SolvedSource,
+    StudentSolvedProblem,
+    Submission,
+    SubmissionLanguage,
+    SubmissionStatus,
 )
 from app.models.token import (
     EmailVerificationToken,
@@ -36,4 +45,14 @@ __all__ = [
     "LessonQuestion",
     "LessonProgress",
     "ProgressStatus",
+    "Problem",
+    "ProblemSource",
+    "ProblemTag",
+    "ProblemTest",
+    "Submission",
+    "SubmissionLanguage",
+    "SubmissionStatus",
+    "StudentSolvedProblem",
+    "SolvedSource",
+    "CfSyncState",
 ]

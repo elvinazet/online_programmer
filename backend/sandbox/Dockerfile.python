@@ -1,0 +1,5 @@
+FROM python:3.12-alpine
+COPY run_python.sh /run.sh
+RUN chmod +x /run.sh && adduser -D -u 1000 runner
+USER runner
+ENTRYPOINT ["/run.sh"]
