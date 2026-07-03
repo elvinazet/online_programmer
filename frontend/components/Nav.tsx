@@ -22,6 +22,9 @@ export default function Nav() {
             <Link href="/problems" className="text-sm text-slate-600 hover:text-slate-900">
               Задачи
             </Link>
+            <Link href="/exams" className="text-sm text-slate-600 hover:text-slate-900">
+              Экзамены
+            </Link>
             <Link href="/me" className="text-sm text-slate-600 hover:text-slate-900">
               Профиль
             </Link>

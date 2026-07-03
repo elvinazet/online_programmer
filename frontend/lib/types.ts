@@ -134,3 +134,69 @@ export interface Stats {
   by_rating: Record<string, number>;
   by_tag: Record<string, number>;
 }
+
+export interface Exam {
+  id: number;
+  title: string;
+  target_level_id?: number | null;
+  level_from_id?: number | null;
+  duration_seconds: number;
+  pass_threshold: number;
+  retake_delay_days: number;
+  practical_weight: number;
+  theory_weight: number;
+  is_published: boolean;
+}
+
+export type AttemptStatus = "in_progress" | "submitted" | "timed_out";
+
+export interface AttemptQuestionView {
+  id: number;
+  question_id: number;
+  type: QuestionType;
+  prompt_md: string;
+  options?: string[] | null;
+  student_answer: unknown;
+  order_index: number;
+}
+
+export interface AttemptProblemView {
+  id: number;
+  problem_id: number;
+  title: string;
+  order_index: number;
+  max_score: number;
+  best_score: number;
+}
+
+export interface AttemptResult {
+  total_score: number;
+  practical_score: number;
+  theory_score: number;
+  passed: boolean;
+  next_retake_allowed_at?: string | null;
+}
+
+export interface AttemptDetail {
+  id: number;
+  exam_id: number;
+  attempt_number: number;
+  status: AttemptStatus;
+  started_at: string;
+  ends_at: string;
+  remaining_seconds: number;
+  questions: AttemptQuestionView[];
+  problems: AttemptProblemView[];
+  result?: AttemptResult | null;
+}
+
+export interface AttemptSummary {
+  id: number;
+  student_id: number;
+  attempt_number: number;
+  status: AttemptStatus;
+  total_score: number;
+  practical_score: number;
+  theory_score: number;
+  passed: boolean;
+}

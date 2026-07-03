@@ -29,7 +29,15 @@ const DEFAULT_CODE: Record<string, string> = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export default function SubmitPanel({ problemId }: { problemId: number }) {
+export default function SubmitPanel({
+  problemId,
+  attemptId,
+  onResult,
+}: {
+  problemId: number;
+  attemptId?: number;
+  onResult?: () => void;
+}) {
   const [language, setLanguage] = useState<"python" | "cpp">("python");
   const [code, setCode] = useState(DEFAULT_CODE.python);
   const [submission, setSubmission] = useState<Submission | null>(null);
@@ -48,10 +56,10 @@ export default function SubmitPanel({ problemId }: { problemId: number }) {
     setBusy(true);
     setSubmission(null);
     try {
-      let result = await api.post<Submission>(`/problems/${problemId}/submissions`, {
-        language,
-        source_code: code,
-      });
+      const path = attemptId
+        ? `/attempts/${attemptId}/problems/${problemId}/submissions`
+        : `/problems/${problemId}/submissions`;
+      let result = await api.post<Submission>(path, { language, source_code: code });
       setSubmission(result);
       // опрос вердикта (в проде судья асинхронный через Celery)
       let tries = 0;
@@ -61,6 +69,7 @@ export default function SubmitPanel({ problemId }: { problemId: number }) {
         setSubmission(result);
         tries += 1;
       }
+      onResult?.();
     } catch (e: any) {
       setError(e.message);
     } finally {
