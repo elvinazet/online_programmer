@@ -11,6 +11,8 @@ os.environ.setdefault("EMAIL_BACKEND", "console")
 # Судим синхронно локальным исполнителем — без Docker/Celery/Redis.
 os.environ.setdefault("JUDGE_INLINE", "true")
 os.environ.setdefault("JUDGE_BACKEND", "local")
+# Rate-limit авторизации требует Redis — в тестах выключаем.
+os.environ.setdefault("AUTH_RATE_LIMIT_ENABLED", "false")
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

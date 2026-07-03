@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     cf_api_base: str = "https://codeforces.com/api"
     cf_rate_limit_ms: int = 2000  # не чаще 1 запроса в 2 секунды (глобально)
 
+    # Rate-limit эндпоинтов авторизации (по IP, fixed-window в Redis)
+    auth_rate_limit_enabled: bool = True
+    auth_rate_limit_max: int = 10
+    auth_rate_limit_window_seconds: int = 60
+
     # Celery (по умолчанию использует Redis)
     celery_broker_url: str = ""
 

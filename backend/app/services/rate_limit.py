@@ -25,6 +25,15 @@ class RedisRateLimiter:
             time.sleep(poll_seconds)
 
 
+def allow_request(client: redis.Redis, key: str, limit: int, window_seconds: int) -> bool:
+    """Fixed-window счётчик: True, если в текущем окне не превышен лимит."""
+    pipe = client.pipeline()
+    pipe.incr(key)
+    pipe.expire(key, window_seconds)
+    count, _ = pipe.execute()
+    return count <= limit
+
+
 _client: redis.Redis | None = None
 
 

@@ -18,12 +18,14 @@ from app.api.stats import router as stats_router
 from app.api.submissions import router as submissions_router
 from app.api.users import router as users_router
 from app.core.config import settings
+from app.core.middleware import AuthRateLimitMiddleware
 from app.db.session import engine
 
 logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title=settings.app_name)
 
+app.add_middleware(AuthRateLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_url],

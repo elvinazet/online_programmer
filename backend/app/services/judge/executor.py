@@ -67,7 +67,9 @@ class LocalSession:
         is_cpp = self.language == SubmissionLanguage.cpp
 
         def set_limits():
-            cpu = max(1, time_limit_ms // 1000 + 1)
+            # CPU-лимит как backstop ставим выше wall-таймаута, чтобы TLE
+            # ловился по wall-времени (иначе SIGXCPU классифицируется как RE).
+            cpu = time_limit_ms // 1000 + 2
             resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu + 1))
             # RLIMIT_AS ломает старт интерпретатора Python, поэтому только для C++
             if is_cpp:

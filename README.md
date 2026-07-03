@@ -28,17 +28,38 @@
 
 ## Статус
 
-🟡 **Этап 1 — проектирование.** Согласовываем архитектуру и схему БД.
-Реализация идёт по этапам после подтверждения (см. ROADMAP).
+🟢 **Все этапы (1–7) реализованы.** Авторизация, учебники, задачи Codeforces
+с локальной проверкой, экзамены, разбор результатов и харденинг — готовы.
+Backend покрыт тестами (pytest), frontend собирается (`next build`), есть CI.
 
-## Как это будет запускаться
+> Judge через Docker собран, но его изоляцию нужно проверить в среде с Docker —
+> в CI/разработке judge гоняется на `LocalExecutor` (Python). См. ROADMAP.
 
-После реализации MVP (Этап 2) весь стек поднимается одной командой:
+## Запуск
 
 ```bash
-cp .env.example .env      # настроить секреты
-docker compose up --build
+cp .env.example .env                  # задать JWT_SECRET и пр.
+bash backend/sandbox/build.sh         # собрать sandbox-образы для judge (нужен Docker)
+docker compose up --build             # db, redis, api, worker, beat, frontend, nginx
+docker compose exec api python -m app.seed   # демо-данные (по желанию)
 ```
 
-Подробные инструкции по запуску и тестированию будут добавляться в конце
-каждого этапа реализации.
+Приложение: **http://localhost** (через nginx). Swagger API: http://localhost/api… ,
+напрямую — http://localhost:8000/docs.
+
+**Демо-доступы после seed:** учитель `teacher@demo.local`, ученик
+`student@demo.local`, пароль `password123`.
+
+## Тесты и локальная разработка
+
+```bash
+# backend
+cd backend && python -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt && pytest
+
+# frontend (нужен запущенный backend на :8000)
+cd frontend && npm install && npm run dev
+```
+
+Подробности — в [`backend/README.md`](backend/README.md) и
+[`frontend/README.md`](frontend/README.md).

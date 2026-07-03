@@ -66,5 +66,26 @@ services:
       redis:
         condition: service_healthy
 
+  # Next.js. Собирается с NEXT_PUBLIC_API_URL="" → запросы к /api идут на тот
+  # же origin (через nginx).
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ""
+    depends_on:
+      - api
+
+  # Единая точка входа (и место терминации TLS в проде).
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+      - frontend
+
 volumes:
   pgdata:

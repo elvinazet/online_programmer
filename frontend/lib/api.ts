@@ -1,5 +1,6 @@
 // Тонкий клиент REST API с хранением токенов и авто-обновлением access по 401.
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Пустая строка = тот же origin (через nginx); по умолчанию — localhost:8000 (dev).
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const ACCESS_KEY = "op_access";
 const REFRESH_KEY = "op_refresh";
