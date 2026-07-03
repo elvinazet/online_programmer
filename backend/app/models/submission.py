@@ -39,6 +39,8 @@ class Submission(Base, TimestampMixin):
     problem_id: Mapped[int] = mapped_column(
         BigInt, ForeignKey("problems.id", ondelete="CASCADE"), index=True, nullable=False
     )
+    # практический сабмит в рамках попытки экзамена (без DB-FK — связь на уровне app)
+    exam_attempt_id: Mapped[int | None] = mapped_column(BigInt, index=True)
     language: Mapped[SubmissionLanguage] = mapped_column(
         Enum(SubmissionLanguage, name="submission_language"), nullable=False
     )

@@ -3,14 +3,23 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from pydantic import BaseModel
+
 from app.core.deps import require_role
 from app.db.session import get_db
+from app.models.exam import StudentLevelAccess
 from app.models.problem import Problem, ProblemTag
 from app.models.submission import StudentSolvedProblem
 from app.models.user import User, UserRole
 from app.schemas.stats import StatsOut
 
 router = APIRouter(tags=["stats"])
+
+
+class LevelAccessOut(BaseModel):
+    level_id: int
+    unlocked: bool
+    exam_passed: bool
 
 
 @router.get("/me/stats", response_model=StatsOut)
@@ -41,3 +50,17 @@ def my_stats(
     by_tag = {tag: count for tag, count in tag_rows}
 
     return StatsOut(solved_total=solved_total or 0, by_rating=by_rating, by_tag=by_tag)
+
+
+@router.get("/me/level-access", response_model=list[LevelAccessOut])
+def my_level_access(
+    student: User = Depends(require_role(UserRole.student)),
+    db: Session = Depends(get_db),
+) -> list[LevelAccessOut]:
+    rows = db.scalars(
+        select(StudentLevelAccess).where(StudentLevelAccess.student_id == student.id)
+    )
+    return [
+        LevelAccessOut(level_id=r.level_id, unlocked=r.unlocked, exam_passed=r.exam_passed)
+        for r in rows
+    ]

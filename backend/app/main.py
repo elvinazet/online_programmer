@@ -5,9 +5,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.api.attempts import router as attempts_router
 from app.api.auth import router as auth_router
 from app.api.codeforces import router as codeforces_router
 from app.api.content import router as content_router
+from app.api.exams import router as exams_router
 from app.api.groups import router as groups_router
 from app.api.problems import router as problems_router
 from app.api.quiz import router as quiz_router
@@ -38,6 +40,8 @@ app.include_router(problems_router, prefix="/api")
 app.include_router(submissions_router, prefix="/api")
 app.include_router(codeforces_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")
+app.include_router(exams_router, prefix="/api")
+app.include_router(attempts_router, prefix="/api")
 
 
 @app.get("/health", tags=["health"])

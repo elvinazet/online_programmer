@@ -1,5 +1,17 @@
 """Импорт всех моделей — чтобы Base.metadata был полным (для Alembic и тестов)."""
 from app.models.content import Course, CourseLanguage, Lesson, Level, LevelName, Module
+from app.models.exam import (
+    AttemptEvent,
+    AttemptEventType,
+    AttemptProblem,
+    AttemptQuestion,
+    AttemptStatus,
+    Exam,
+    ExamAttempt,
+    ExamPracticalProblem,
+    ExamTheoryConfig,
+    StudentLevelAccess,
+)
 from app.models.group import Group, GroupMember
 from app.models.problem import Problem, ProblemSource, ProblemTag, ProblemTest
 from app.models.quiz import (
@@ -55,4 +67,14 @@ __all__ = [
     "StudentSolvedProblem",
     "SolvedSource",
     "CfSyncState",
+    "Exam",
+    "ExamPracticalProblem",
+    "ExamTheoryConfig",
+    "ExamAttempt",
+    "AttemptStatus",
+    "AttemptProblem",
+    "AttemptQuestion",
+    "AttemptEvent",
+    "AttemptEventType",
+    "StudentLevelAccess",
 ]
