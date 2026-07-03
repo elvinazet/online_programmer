@@ -1,16 +1,18 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { Stats } from "@/lib/types";
+import type { ExamHistoryItem, Stats } from "@/lib/types";
 
 export default function ProfilePage() {
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
   const [handle, setHandle] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
+  const [history, setHistory] = useState<ExamHistoryItem[]>([]);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -22,6 +24,7 @@ export default function ProfilePage() {
     setHandle(user.student_profile?.codeforces_handle || "");
     if (user.role === "student") {
       api.get<Stats>("/me/stats").then(setStats).catch(() => setStats(null));
+      api.get<ExamHistoryItem[]>("/me/exam-history").then(setHistory).catch(() => setHistory([]));
     }
   }, [user, loading, router]);
 
@@ -91,6 +94,42 @@ export default function ProfilePage() {
               </div>
             ) : (
               <p className="text-slate-500">Пока нет данных.</p>
+            )}
+          </section>
+
+          <section className="rounded border border-slate-200 bg-white p-4">
+            <h2 className="mb-3 font-semibold">История экзаменов</h2>
+            {history.length === 0 ? (
+              <p className="text-slate-500">Пока нет завершённых экзаменов.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-slate-500">
+                    <th className="py-1">Экзамен</th>
+                    <th>Попытка</th>
+                    <th>Итог</th>
+                    <th>Статус</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((a) => (
+                    <tr key={a.attempt_id} className="border-b border-slate-100">
+                      <td className="py-1">{a.exam_title}</td>
+                      <td>{a.attempt_number}</td>
+                      <td>{a.total_score}%</td>
+                      <td className={a.passed ? "text-emerald-600" : "text-rose-600"}>
+                        {a.passed ? "сдан" : "не сдан"}
+                      </td>
+                      <td>
+                        <Link href={`/attempts/${a.attempt_id}`} className="text-indigo-600 underline">
+                          разбор
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </section>
         </>

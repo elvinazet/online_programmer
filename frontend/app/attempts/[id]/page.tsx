@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import AnalysisView from "@/components/AnalysisView";
 import Markdown from "@/components/Markdown";
 import SubmitPanel from "@/components/SubmitPanel";
 import { api } from "@/lib/api";
@@ -106,12 +107,12 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
   if (attempt.status !== "in_progress" && attempt.result) {
     const r = attempt.result;
     return (
-      <div className="mx-auto max-w-lg text-center">
-        <h1 className="mb-3 text-2xl font-semibold">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="mb-3 text-center text-2xl font-semibold">
           {attempt.status === "timed_out" ? "Время вышло" : "Экзамен завершён"}
         </h1>
         <div
-          className={`rounded p-4 text-lg ${
+          className={`rounded p-4 text-center text-lg ${
             r.passed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
           }`}
         >
@@ -125,7 +126,12 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
             </div>
           )}
         </div>
-        <Link href="/exams" className="mt-4 inline-block text-indigo-600 underline">
+
+        <div className="mt-6">
+          <AnalysisView attemptId={attemptId} />
+        </div>
+
+        <Link href="/exams" className="mt-6 inline-block text-indigo-600 underline">
           К экзаменам
         </Link>
       </div>

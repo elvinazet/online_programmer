@@ -200,3 +200,49 @@ export interface AttemptSummary {
   theory_score: number;
   passed: boolean;
 }
+
+export interface TopicResult {
+  module_id: number;
+  module_title: string;
+  correct: number;
+  total: number;
+  score: number;
+  is_weak: boolean;
+  lessons: { id: number; title: string }[];
+}
+
+export interface PracticeRec {
+  problem_id: number;
+  title: string;
+  rating?: number | null;
+  url?: string | null;
+  tags: string[];
+}
+
+export interface AttemptAnalysis {
+  attempt_id: number;
+  summary: { total_score: number; practical_score: number; theory_score: number; passed: boolean };
+  topics: TopicResult[];
+  practice: PracticeRec[];
+}
+
+export interface ExamHistoryItem {
+  attempt_id: number;
+  exam_id: number;
+  exam_title: string;
+  attempt_number: number;
+  status: AttemptStatus;
+  total_score: number;
+  practical_score: number;
+  theory_score: number;
+  passed: boolean;
+  submitted_at?: string | null;
+}
+
+export interface ExamTopicAggregate {
+  module_id: number;
+  module_title: string;
+  score: number;
+  total_answers: number;
+  is_weak: boolean;
+}

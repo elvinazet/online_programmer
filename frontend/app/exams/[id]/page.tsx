@@ -4,13 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { AttemptSummary, Exam } from "@/lib/types";
+import type { AttemptSummary, Exam, ExamTopicAggregate } from "@/lib/types";
 
 export default function ExamManagePage({ params }: { params: { id: string } }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [exam, setExam] = useState<Exam | null>(null);
   const [attempts, setAttempts] = useState<AttemptSummary[]>([]);
+  const [aggregate, setAggregate] = useState<ExamTopicAggregate[]>([]);
   const [problemId, setProblemId] = useState("");
   const [moduleId, setModuleId] = useState("");
   const [numQ, setNumQ] = useState("5");
@@ -19,6 +20,7 @@ export default function ExamManagePage({ params }: { params: { id: string } }) {
   const load = useCallback(async () => {
     setExam(await api.get<Exam>(`/exams/${params.id}`));
     setAttempts(await api.get<AttemptSummary[]>(`/exams/${params.id}/attempts`));
+    setAggregate(await api.get<ExamTopicAggregate[]>(`/exams/${params.id}/analysis`));
   }, [params.id]);
 
   useEffect(() => {
@@ -156,6 +158,26 @@ export default function ExamManagePage({ params }: { params: { id: string } }) {
           </table>
         )}
       </section>
+
+      {aggregate.length > 0 && (
+        <section>
+          <h2 className="mb-2 font-semibold">Западающие темы группы</h2>
+          <div className="space-y-1">
+            {aggregate.map((a) => (
+              <div key={a.module_id} className="flex items-center gap-2 text-sm">
+                <span className="w-40 shrink-0 text-slate-600">{a.module_title}</span>
+                <div className="h-4 flex-1 rounded bg-slate-100">
+                  <div
+                    className={`h-4 rounded ${a.is_weak ? "bg-rose-400" : "bg-emerald-400"}`}
+                    style={{ width: `${a.score}%` }}
+                  />
+                </div>
+                <span className="w-12 text-right">{a.score}%</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
