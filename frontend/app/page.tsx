@@ -59,11 +59,12 @@ export default function Home() {
                 <span className="badge badge-primary">{a.type === "problem" ? "задача" : "глава"}</span>
                 <Link
                   href={a.type === "problem" ? `/problems/${a.problem_id}` : `/lessons/${a.lesson_id}`}
-                  className="flex-1 font-medium hover:text-[var(--primary)]"
+                  className="font-medium hover:text-[var(--primary)]"
                 >
                   {a.title}
                 </Link>
-                {a.note && <span className="muted text-sm">{a.note}</span>}
+                {a.note && <span className="muted text-sm">· {a.note}</span>}
+                <span className="flex-1" />
               </div>
             ))}
           </div>
