@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.problem import Problem
 from app.models.submission import CfSyncState, SolvedSource, StudentSolvedProblem
+from app.services.streak import bump_streak
 
 
 def _utcnow() -> datetime:
@@ -50,6 +51,9 @@ def sync_user_solved(db: Session, client, student_id: int, handle: str) -> int:
                 )
             )
             newly += 1
+
+    if newly > 0:
+        bump_streak(db, student_id)
 
     state = db.get(CfSyncState, student_id)
     if state is None:

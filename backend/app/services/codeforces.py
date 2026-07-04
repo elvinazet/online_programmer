@@ -38,3 +38,11 @@ class CodeforcesClient:
 
     def user_status(self, handle: str, count: int = 10000, frm: int = 1) -> list:
         return self.call_api("user.status", handle=handle, count=count, **{"from": frm})
+
+    def contest_standings(
+        self, contest_id: int, handles: list[str] | None = None, count: int = 100
+    ) -> dict:
+        params: dict = {"contestId": contest_id, "from": 1, "count": count, "showUnofficial": "true"}
+        if handles:
+            params["handles"] = ";".join(handles)
+        return self.call_api("contest.standings", **params)

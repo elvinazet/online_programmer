@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -8,7 +9,7 @@ import { useToast } from "@/components/Toast";
 import { PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { Course, CourseTree, Language } from "@/lib/types";
+import type { Course, CourseTree, Language, LessonDetail } from "@/lib/types";
 
 export default function TeachPage() {
   const { user, loading } = useAuth();
@@ -27,6 +28,9 @@ export default function TeachPage() {
   const [lesModule, setLesModule] = useState<number | "">("");
   const [lesTitle, setLesTitle] = useState("");
   const [lesContent, setLesContent] = useState("# Заголовок\n\nТекст урока…");
+  const [editLesson, setEditLesson] = useState<number | "">("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
   const loadCourses = useCallback(async () => {
     setCourses(await api.get<Course[]>("/courses"));
@@ -48,8 +52,20 @@ export default function TeachPage() {
     if (typeof selected === "number") loadTree(selected).catch((e) => toast.error(e.message));
   }, [selected, loadTree]);
 
+  useEffect(() => {
+    if (typeof editLesson !== "number") return;
+    api.get<LessonDetail>(`/lessons/${editLesson}`).then((l) => {
+      setEditTitle(l.title);
+      setEditContent(l.content_md);
+    }).catch((e) => toast.error(e.message));
+  }, [editLesson]);
+
   if (loading || !user) return <PageLoader />;
   if (user.role !== "teacher") return <p className="muted">Раздел доступен только учителям.</p>;
+
+  const lessonsFlat = tree
+    ? tree.levels.flatMap((lvl) => lvl.modules.flatMap((m) => m.lessons.map((les) => ({ id: les.id, label: `${m.title} / ${les.title}` }))))
+    : [];
 
   async function wrap(fn: () => Promise<void>, okMsg?: string) {
     try {
@@ -67,7 +83,11 @@ export default function TeachPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Преподавание" subtitle="Создавайте курсы, уроки и квизы" />
+      <PageHeader
+        title="Преподавание"
+        subtitle="Создавайте курсы, уроки и квизы"
+        actions={<Link href="/teach/groups" className="btn btn-ghost btn-sm">Группы и задания →</Link>}
+      />
 
       <section className="card p-5">
         <h2 className="section-title mb-3">Новый курс</h2>
@@ -156,6 +176,32 @@ export default function TeachPage() {
             >
               Сохранить урок
             </button>
+          </section>
+
+          <section className="card p-5">
+            <h2 className="section-title mb-3">Редактировать урок</h2>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <select value={editLesson} onChange={(e) => setEditLesson(e.target.value ? Number(e.target.value) : "")} className="select w-64">
+                <option value="">— выберите урок —</option>
+                {lessonsFlat.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+              </select>
+              {typeof editLesson === "number" && (
+                <input placeholder="Название" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="input flex-1" />
+              )}
+            </div>
+            {typeof editLesson === "number" && (
+              <>
+                <MarkdownEditor value={editContent} onChange={setEditContent} />
+                <button
+                  onClick={() => wrap(async () => {
+                    await api.patch(`/lessons/${editLesson}`, { title: editTitle, content_md: editContent });
+                  }, "Урок обновлён")}
+                  className="btn btn-primary mt-3"
+                >
+                  Сохранить изменения
+                </button>
+              </>
+            )}
           </section>
 
           <section>

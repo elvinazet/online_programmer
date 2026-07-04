@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.analysis import router as analysis_router
+from app.api.assignments import router as assignments_router
 from app.api.attempts import router as attempts_router
 from app.api.auth import router as auth_router
 from app.api.codeforces import router as codeforces_router
@@ -54,6 +55,7 @@ app.include_router(stats_router, prefix="/api")
 app.include_router(exams_router, prefix="/api")
 app.include_router(attempts_router, prefix="/api")
 app.include_router(analysis_router, prefix="/api")
+app.include_router(assignments_router, prefix="/api")
 
 
 @app.get("/health", tags=["health"])

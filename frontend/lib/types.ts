@@ -142,8 +142,52 @@ export interface Submission {
 
 export interface Stats {
   solved_total: number;
+  streak: number;
   by_rating: Record<string, number>;
   by_tag: Record<string, number>;
+}
+
+export interface TimelinePoint {
+  date: string;
+  count: number;
+}
+
+export interface LevelAccess {
+  level_id: number;
+  level_name: string;
+  course_title: string;
+  unlocked: boolean;
+  exam_passed: boolean;
+}
+
+export interface Assignment {
+  id: number;
+  type: "problem" | "lesson";
+  title: string;
+  problem_id?: number | null;
+  lesson_id?: number | null;
+  note?: string | null;
+  due_date?: string | null;
+  done: boolean;
+}
+
+export interface Group {
+  id: number;
+  name: string;
+  teacher_id: number;
+}
+
+export interface GroupMember {
+  student_id: number;
+  email: string;
+}
+
+export interface GroupProgress {
+  student_id: number;
+  email: string;
+  solved_total: number;
+  lessons_completed: number;
+  exams_passed: number;
 }
 
 export interface Exam {

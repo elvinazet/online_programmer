@@ -1,15 +1,24 @@
 """Эндпоинты групп (только для учителей)."""
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.deps import require_role
 from app.core.utils import normalize_email
 from app.db.session import get_db
+from app.models.exam import ExamAttempt
 from app.models.group import Group, GroupMember
+from app.models.quiz import LessonProgress, ProgressStatus
+from app.models.submission import StudentSolvedProblem
 from app.models.user import User, UserRole
 from app.schemas.auth import MessageResponse
-from app.schemas.group import AddMemberRequest, GroupCreate, GroupMemberOut, GroupOut
+from app.schemas.group import (
+    AddMemberRequest,
+    GroupCreate,
+    GroupMemberOut,
+    GroupOut,
+    GroupProgressItem,
+)
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
@@ -83,3 +92,44 @@ def list_members(
         .where(GroupMember.group_id == group_id)
     ).all()
     return [GroupMemberOut(student_id=sid, email=email) for sid, email in rows]
+
+
+@router.get("/{group_id}/progress", response_model=list[GroupProgressItem])
+def group_progress(
+    group_id: int,
+    teacher: User = Depends(require_role(UserRole.teacher)),
+    db: Session = Depends(get_db),
+) -> list[GroupProgressItem]:
+    _owned_group_or_404(db, group_id, teacher)
+    members = db.execute(
+        select(GroupMember.student_id, User.email)
+        .join(User, User.id == GroupMember.student_id)
+        .where(GroupMember.group_id == group_id)
+    ).all()
+
+    result = []
+    for student_id, email in members:
+        solved = db.scalar(
+            select(func.count()).select_from(StudentSolvedProblem).where(
+                StudentSolvedProblem.student_id == student_id
+            )
+        )
+        lessons = db.scalar(
+            select(func.count()).select_from(LessonProgress).where(
+                LessonProgress.student_id == student_id,
+                LessonProgress.status == ProgressStatus.completed,
+            )
+        )
+        exams = db.scalar(
+            select(func.count()).select_from(ExamAttempt).where(
+                ExamAttempt.student_id == student_id, ExamAttempt.passed.is_(True)
+            )
+        )
+        result.append(
+            GroupProgressItem(
+                student_id=student_id, email=email,
+                solved_total=solved or 0, lessons_completed=lessons or 0,
+                exams_passed=exams or 0,
+            )
+        )
+    return result

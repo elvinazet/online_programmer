@@ -23,3 +23,11 @@ class GroupMemberOut(BaseModel):
 
     student_id: int
     email: EmailStr
+
+
+class GroupProgressItem(BaseModel):
+    student_id: int
+    email: EmailStr
+    solved_total: int
+    lessons_completed: int
+    exams_passed: int

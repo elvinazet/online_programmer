@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { Course } from "@/lib/types";
+import type { Assignment, Course } from "@/lib/types";
 
 const LANG_BADGE: Record<string, string> = { python: "🐍 Python", cpp: "＋＋ C++" };
 
@@ -20,6 +20,7 @@ export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [courses, setCourses] = useState<Course[] | null>(null);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   useEffect(() => {
     if (loading) return;
@@ -28,6 +29,9 @@ export default function Home() {
       return;
     }
     api.get<Course[]>("/courses").then(setCourses).catch(() => setCourses([]));
+    if (user.role === "student") {
+      api.get<Assignment[]>("/me/assignments").then(setAssignments).catch(() => setAssignments([]));
+    }
   }, [user, loading, router]);
 
   if (loading || !user) return <PageLoader />;
@@ -45,6 +49,26 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      {user.role === "student" && assignments.filter((a) => !a.done).length > 0 && (
+        <section>
+          <h2 className="section-title mb-3">Мои задания</h2>
+          <div className="card divide-y" style={{ borderColor: "var(--border)" }}>
+            {assignments.filter((a) => !a.done).map((a) => (
+              <div key={a.id} className="table-row flex items-center gap-3 px-5 py-3 last:border-0">
+                <span className="badge badge-primary">{a.type === "problem" ? "задача" : "глава"}</span>
+                <Link
+                  href={a.type === "problem" ? `/problems/${a.problem_id}` : `/lessons/${a.lesson_id}`}
+                  className="flex-1 font-medium hover:text-[var(--primary)]"
+                >
+                  {a.title}
+                </Link>
+                {a.note && <span className="muted text-sm">{a.note}</span>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {QUICK.map((q) => (

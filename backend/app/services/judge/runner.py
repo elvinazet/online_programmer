@@ -12,6 +12,7 @@ from app.models.submission import (
     Submission,
     SubmissionStatus,
 )
+from app.services.streak import bump_streak
 
 
 def _normalize(text: str) -> str:
@@ -36,6 +37,7 @@ def _mark_solved(db: Session, student_id: int, problem_id: int) -> None:
                 solved_at=datetime.now(timezone.utc),
             )
         )
+        bump_streak(db, student_id)
         db.commit()
 
 

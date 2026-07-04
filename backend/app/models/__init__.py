@@ -1,4 +1,5 @@
 """Импорт всех моделей — чтобы Base.metadata был полным (для Alembic и тестов)."""
+from app.models.assignment import Assignment, AssignmentType
 from app.models.content import Course, CourseLanguage, Lesson, Level, LevelName, Module
 from app.models.exam import (
     AttemptEvent,
@@ -77,4 +78,6 @@ __all__ = [
     "AttemptEvent",
     "AttemptEventType",
     "StudentLevelAccess",
+    "Assignment",
+    "AssignmentType",
 ]
