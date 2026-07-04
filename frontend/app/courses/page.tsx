@@ -3,12 +3,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Icon, LangMark } from "@/components/Icon";
 import { EmptyState, PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { Course } from "@/lib/types";
 
-const LANG_BADGE: Record<string, string> = { python: "🐍 Python", cpp: "＋＋ C++" };
+const LANG_LABEL: Record<string, string> = { python: "Python", cpp: "C++" };
 
 export default function CoursesPage() {
   const { user, loading } = useAuth();
@@ -33,7 +34,7 @@ export default function CoursesPage() {
         <PageLoader />
       ) : courses.length === 0 ? (
         <EmptyState
-          icon="📚"
+          icon={<Icon name="book" className="h-7 w-7" />}
           title="Курсов пока нет"
           hint={user.role === "teacher" ? "Создайте первый курс в разделе «Преподавание»." : "Загляните позже — курсы уже в пути."}
           action={user.role === "teacher" ? <Link href="/teach" className="btn btn-primary btn-sm">В преподавание</Link> : undefined}
@@ -41,12 +42,17 @@ export default function CoursesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {courses.map((c) => (
-            <Link key={c.id} href={`/courses/${c.id}`} className="card flex items-center justify-between p-6 transition hover:-translate-y-0.5">
-              <div>
-                <div className="text-lg font-extrabold">{c.title}</div>
-                {c.description && <div className="muted mt-1 text-sm">{c.description}</div>}
+            <Link key={c.id} href={`/courses/${c.id}`} className="card flex items-center justify-between gap-4 p-6 transition hover:-translate-y-0.5">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--surface-2)]">
+                  <LangMark language={c.language} className="h-6 w-6" />
+                </span>
+                <div className="min-w-0">
+                  <div className="truncate text-lg font-extrabold">{c.title}</div>
+                  {c.description && <div className="muted mt-1 truncate text-sm">{c.description}</div>}
+                </div>
               </div>
-              <span className="badge badge-accent">{LANG_BADGE[c.language] || c.language}</span>
+              <span className="badge badge-accent shrink-0">{LANG_LABEL[c.language] || c.language}</span>
             </Link>
           ))}
         </div>

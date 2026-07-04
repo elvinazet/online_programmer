@@ -1,6 +1,8 @@
 "use client";
 import type { ReactNode } from "react";
 
+import { Icon } from "./Icon";
+
 export function Spinner({ className = "" }: { className?: string }) {
   return (
     <span
@@ -22,18 +24,20 @@ export function PageLoader({ label = "Загрузка…" }: { label?: string }
 export function EmptyState({
   title,
   hint,
-  icon = "✨",
+  icon,
   action,
 }: {
   title: string;
   hint?: string;
-  icon?: string;
+  icon?: ReactNode;
   action?: ReactNode;
 }) {
   return (
     <div className="card flex flex-col items-center gap-2 px-6 py-12 text-center">
-      <div className="text-3xl">{icon}</div>
-      <div className="font-medium">{title}</div>
+      <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--surface-2)] text-[var(--primary)]">
+        {icon ?? <Icon name="sparkles" className="h-7 w-7" />}
+      </div>
+      <div className="mt-1 font-medium">{title}</div>
       {hint && <div className="muted text-sm">{hint}</div>}
       {action && <div className="mt-2">{action}</div>}
     </div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import Markdown from "@/components/Markdown";
 import SubmitPanel from "@/components/SubmitPanel";
 import { PageLoader } from "@/components/ui";
@@ -35,12 +36,16 @@ export default function ProblemPage({ params }: { params: { id: string } }) {
         <Link href="/problems" className="link text-sm">← Задачи</Link>
         <div className="mt-2 flex items-center gap-2">
           <h1 className="page-title">{problem.title}</h1>
-          {problem.solved && <span className="badge badge-success">✓ решено</span>}
+          {problem.solved && (
+            <span className="badge badge-success">
+              <Icon name="check" className="h-3.5 w-3.5" strokeWidth={2.5} /> решено
+            </span>
+          )}
         </div>
         <div className="muted mt-2 flex flex-wrap gap-3 text-sm">
           {problem.rating && <span className="badge">рейтинг {problem.rating}</span>}
-          <span className="badge">⏱ {problem.time_limit_ms} мс</span>
-          <span className="badge">🧠 {problem.memory_limit_mb} МБ</span>
+          <span className="badge"><Icon name="clock" className="h-3.5 w-3.5" /> {problem.time_limit_ms} мс</span>
+          <span className="badge"><Icon name="chip" className="h-3.5 w-3.5" /> {problem.memory_limit_mb} МБ</span>
           {problem.tags.map((t) => <span key={t} className="badge badge-primary">{t}</span>)}
           {problem.url && <a href={problem.url} target="_blank" rel="noreferrer" className="link">Codeforces ↗</a>}
         </div>

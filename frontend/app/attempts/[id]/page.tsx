@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import AnalysisView from "@/components/AnalysisView";
+import { Icon } from "@/components/Icon";
 import Markdown from "@/components/Markdown";
 import SubmitPanel from "@/components/SubmitPanel";
 import { PageLoader } from "@/components/ui";
@@ -100,7 +101,10 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
           {attempt.status === "timed_out" ? "Время вышло" : "Экзамен завершён"}
         </h1>
         <div className={`card p-5 text-center text-lg ${r.passed ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
-          Итог: {r.total_score}% — {r.passed ? "сдано 🎉" : "не сдано"}
+          <div className="flex items-center justify-center gap-2">
+            <Icon name={r.passed ? "check-badge" : "warning"} className="h-6 w-6 shrink-0" />
+            <span>Итог: {r.total_score}% — {r.passed ? "сдано" : "не сдано"}</span>
+          </div>
           <div className="muted mt-2 text-sm">Практика: {r.practical_score}% · Теория: {r.theory_score}%</div>
           {!r.passed && r.next_retake_allowed_at && (
             <div className="muted mt-2 text-sm">Пересдача после: {new Date(r.next_retake_allowed_at).toLocaleString()}</div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { useToast } from "@/components/Toast";
 import { PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -93,18 +94,22 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="card p-4 text-center">
+              <Icon name="puzzle" className="mx-auto mb-1 h-6 w-6 text-[var(--primary)]" />
               <div className="text-2xl font-semibold">{stats?.solved_total ?? 0}</div>
               <div className="muted text-sm">решено задач</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-2xl font-semibold">🔥 {stats?.streak ?? 0}</div>
+              <Icon name="fire" className="mx-auto mb-1 h-6 w-6 text-[var(--warning)]" />
+              <div className="text-2xl font-semibold">{stats?.streak ?? 0}</div>
               <div className="muted text-sm">streak, дней</div>
             </div>
             <div className="card p-4 text-center">
+              <Icon name="unlock" className="mx-auto mb-1 h-6 w-6 text-[var(--primary)]" />
               <div className="text-2xl font-semibold">{levels.filter((l) => l.unlocked).length}</div>
               <div className="muted text-sm">открыто уровней</div>
             </div>
             <div className="card p-4 text-center">
+              <Icon name="trophy" className="mx-auto mb-1 h-6 w-6 text-[var(--primary)]" />
               <div className="text-2xl font-semibold">{history.filter((h) => h.passed).length}</div>
               <div className="muted text-sm">сдано экзаменов</div>
             </div>

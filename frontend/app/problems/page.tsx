@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { EmptyState, PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -66,7 +67,7 @@ export default function ProblemsPage() {
       {problems === null ? (
         <PageLoader />
       ) : problems.length === 0 ? (
-        <EmptyState icon="🧩" title="Задач не найдено" hint="Измените фильтры или синхронизируйте задачи Codeforces." />
+        <EmptyState icon={<Icon name="puzzle" className="h-7 w-7" />} title="Задач не найдено" hint="Измените фильтры или синхронизируйте задачи Codeforces." />
       ) : (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
@@ -87,7 +88,7 @@ export default function ProblemsPage() {
                     </td>
                     <td className="px-4 py-2.5 muted">{p.rating ?? "—"}</td>
                     <td className="px-4 py-2.5 muted">{p.tags.join(", ")}</td>
-                    <td className="px-4 py-2.5">{p.solved && <span className="badge badge-success">✓ решено</span>}</td>
+                    <td className="px-4 py-2.5">{p.solved && <span className="badge badge-success"><Icon name="check" className="h-3.5 w-3.5" strokeWidth={2.5} /> решено</span>}</td>
                   </tr>
                 ))}
               </tbody>

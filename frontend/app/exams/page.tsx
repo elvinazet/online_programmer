@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { useToast } from "@/components/Toast";
 import { EmptyState, PageHeader, PageLoader, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -65,7 +66,7 @@ export default function ExamsPage() {
       {exams === null ? (
         <PageLoader />
       ) : exams.length === 0 ? (
-        <EmptyState icon="🏁" title="Экзаменов пока нет" />
+        <EmptyState icon={<Icon name="flag" className="h-7 w-7" />} title="Экзаменов пока нет" />
       ) : (
         <div className="space-y-3">
           {exams.map((ex) => (

@@ -1,6 +1,8 @@
 "use client";
 import { createContext, useCallback, useContext, useState } from "react";
 
+import { Icon } from "./Icon";
+
 type ToastKind = "success" | "error" | "info";
 interface Toast {
   id: number;
@@ -21,7 +23,11 @@ const STYLES: Record<ToastKind, string> = {
   error: "badge-danger",
   info: "badge-primary",
 };
-const ICONS: Record<ToastKind, string> = { success: "✓", error: "✕", info: "i" };
+const ICONS: Record<ToastKind, React.ReactNode> = {
+  success: <Icon name="check" className="h-3.5 w-3.5" strokeWidth={2.6} />,
+  error: <Icon name="x" className="h-3.5 w-3.5" strokeWidth={2.6} />,
+  info: <span className="text-xs font-black">i</span>,
+};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);

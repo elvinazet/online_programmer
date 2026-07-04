@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Role } from "@/lib/types";
@@ -39,8 +40,10 @@ export default function RegisterPage() {
     return (
       <div className="mx-auto mt-8 max-w-sm">
         <div className="card p-7 text-center">
-          <div className="text-3xl">📬</div>
-          <h1 className="page-title mt-2">Почти готово</h1>
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[var(--surface-2)] text-[var(--primary)]">
+            <Icon name="mail" className="h-7 w-7" />
+          </div>
+          <h1 className="page-title mt-3">Почти готово</h1>
           <p className="muted mt-2 text-sm">
             Мы отправили письмо для подтверждения email. В dev-режиме ссылка печатается
             в лог контейнера <code>api</code>.

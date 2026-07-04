@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -66,7 +67,7 @@ export default function CoursePage({ params }: { params: { id: string } }) {
                 <h2 className="section-title text-[var(--primary)]">
                   {LEVEL_LABELS[level.name] || level.name}
                 </h2>
-                {!open && <span className="badge badge-warning">🔒 закрыт</span>}
+                {!open && <span className="badge badge-warning"><Icon name="lock" className="h-3.5 w-3.5" /> закрыт</span>}
               </div>
               {!open && (
                 <p className="muted mb-3 text-sm">

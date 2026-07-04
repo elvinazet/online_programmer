@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 
@@ -34,8 +35,10 @@ export default function ResetPasswordPage() {
     return (
       <div className="mx-auto mt-8 max-w-sm">
         <div className="card p-7 text-center">
-          <div className="text-3xl">🔓</div>
-          <h1 className="page-title mt-2">Пароль обновлён</h1>
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[var(--success-soft)] text-[var(--success)]">
+            <Icon name="check-badge" className="h-7 w-7" />
+          </div>
+          <h1 className="page-title mt-3">Пароль обновлён</h1>
           <Link href="/login" className="link mt-4 inline-block">Войти с новым паролем</Link>
         </div>
       </div>

@@ -3,16 +3,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import Burst from "@/components/Burst";
+import { Icon, type IconName } from "@/components/Icon";
 import Landing from "@/components/Landing";
 import { PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { Assignment } from "@/lib/types";
 
-const QUICK = [
-  { href: "/courses", label: "Курсы", icon: "📚", desc: "Учебники C++ и Python" },
-  { href: "/problems", label: "Задачи", icon: "🧩", desc: "Практика с проверкой в браузере" },
-  { href: "/exams", label: "Экзамены", icon: "🏁", desc: "Контесты на время с разбором" },
+const QUICK: { href: string; label: string; icon: IconName; desc: string }[] = [
+  { href: "/courses", label: "Курсы", icon: "book", desc: "Учебники C++ и Python" },
+  { href: "/problems", label: "Задачи", icon: "puzzle", desc: "Практика с проверкой в браузере" },
+  { href: "/exams", label: "Экзамены", icon: "flag", desc: "Контесты на время с разбором" },
 ];
 
 export default function Home() {
@@ -34,8 +35,9 @@ export default function Home() {
       <section className="card relative overflow-hidden p-8">
         <Burst points={12} inner={0.42} className="float absolute -right-6 -top-8 h-24 w-24 text-[var(--accent)]" />
         <p className="eyebrow">onproger</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">
-          Привет, {user.email.split("@")[0]} 👋
+        <h1 className="mt-2 flex items-center gap-2 text-3xl font-black tracking-tight">
+          Привет, {user.email.split("@")[0]}
+          <Icon name="wave" className="h-7 w-7 text-[var(--primary)]" />
         </h1>
         <p className="muted mt-2 max-w-xl">
           {user.role === "teacher"
@@ -67,7 +69,9 @@ export default function Home() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {QUICK.map((q) => (
           <Link key={q.label} href={q.href} className="card group p-5 transition hover:-translate-y-0.5">
-            <div className="text-2xl">{q.icon}</div>
+            <div className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--surface-2)] text-[var(--primary)]">
+              <Icon name={q.icon} className="h-6 w-6" />
+            </div>
             <div className="mt-3 font-extrabold group-hover:text-[var(--primary)]">{q.label}</div>
             <div className="muted mt-1 text-sm">{q.desc}</div>
           </Link>

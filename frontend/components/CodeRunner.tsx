@@ -2,6 +2,8 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
+import { Icon } from "./Icon";
+
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 const PYODIDE_VERSION = "v0.26.2";
@@ -73,7 +75,7 @@ export default function CodeRunner({
           disabled={running}
           className="btn btn-success btn-sm"
         >
-          {running ? "Выполняется…" : "▶ Запустить"}
+          {running ? "Выполняется…" : <><Icon name="play" className="h-3.5 w-3.5" /> Запустить</>}
         </button>
         <span className="text-xs text-slate-400">{language === "python" ? "Python (Pyodide)" : "C++"}</span>
       </div>

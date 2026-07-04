@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 
+import { Icon } from "@/components/Icon";
 import { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 import type { QuestionType } from "@/lib/types";
@@ -101,7 +102,7 @@ export default function QuestionForm({
                 className="input flex-1"
               />
               {options.length > 2 && (
-                <button onClick={() => setOptions((o) => o.filter((_, i) => i !== idx))} className="btn btn-ghost btn-sm">✕</button>
+                <button onClick={() => setOptions((o) => o.filter((_, i) => i !== idx))} className="btn btn-ghost btn-sm" aria-label="Удалить вариант"><Icon name="x" className="h-4 w-4" /></button>
               )}
             </div>
           ))}
@@ -116,7 +117,7 @@ export default function QuestionForm({
             <div key={idx} className="flex items-center gap-2">
               <input value={a} onChange={(e) => setAccepted((arr) => arr.map((x, i) => (i === idx ? e.target.value : x)))} placeholder="Ответ" className="input flex-1" />
               {accepted.length > 1 && (
-                <button onClick={() => setAccepted((arr) => arr.filter((_, i) => i !== idx))} className="btn btn-ghost btn-sm">✕</button>
+                <button onClick={() => setAccepted((arr) => arr.filter((_, i) => i !== idx))} className="btn btn-ghost btn-sm" aria-label="Удалить ответ"><Icon name="x" className="h-4 w-4" /></button>
               )}
             </div>
           ))}

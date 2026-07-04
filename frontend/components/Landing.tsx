@@ -2,25 +2,26 @@
 import Link from "next/link";
 
 import Burst from "./Burst";
+import { Icon, type IconName } from "./Icon";
 
-const FEATURES = [
+const FEATURES: { icon: IconName; title: string; text: string }[] = [
   {
-    icon: "📚",
+    icon: "book",
     title: "Интерактивные учебники",
     text: "C++ и Python: курс → уровень → модуль → урок. Markdown с подсветкой кода, примеры с запуском прямо в браузере и мини-квиз в конце каждого урока.",
   },
   {
-    icon: "🧩",
+    icon: "puzzle",
     title: "Практика на Codeforces",
     text: "Подбор задач по темам и рейтингу под твой уровень. Пишешь решение в редакторе — оно проверяется на тестах в изолированном sandbox, вердикт сразу.",
   },
   {
-    icon: "🏁",
+    icon: "flag",
     title: "Экзамены на уровень",
     text: "Переход на следующий уровень — через контест на время: практика (задачи) + теория. Серверный таймер и честный порог сдачи.",
   },
   {
-    icon: "🔍",
+    icon: "search",
     title: "Разбор результатов",
     text: "После каждого экзамена — карта сильных и слабых тем и персональный план: какие уроки повторить и какие задачи прорешать.",
   },
@@ -69,8 +70,12 @@ export default function Landing() {
 print(a + b)`}
             </pre>
             <div className="flex items-center justify-between px-4 py-3">
-              <span className="btn btn-accent btn-sm">▶ Запустить</span>
-              <span className="badge badge-success">✓ Принято · 2/2 тестов</span>
+              <span className="btn btn-accent btn-sm">
+                <Icon name="play" className="h-3.5 w-3.5" /> Запустить
+              </span>
+              <span className="badge badge-success">
+                <Icon name="check" className="h-3.5 w-3.5" strokeWidth={2.5} /> Принято · 2/2 тестов
+              </span>
             </div>
           </div>
         </div>
@@ -83,7 +88,9 @@ print(a + b)`}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {FEATURES.map((f) => (
             <div key={f.title} className="card p-6">
-              <div className="text-3xl">{f.icon}</div>
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--surface-2)] text-[var(--primary)]">
+                <Icon name={f.icon} className="h-6 w-6" />
+              </div>
               <h3 className="mt-3 text-lg font-extrabold">{f.title}</h3>
               <p className="muted mt-1 text-sm">{f.text}</p>
             </div>
@@ -102,15 +109,15 @@ print(a + b)`}
           как в настоящей игре.
         </p>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { big: "🔥", t: "streak за активность" },
-            { big: "📈", t: "статистика по темам" },
-            { big: "🏆", t: "история экзаменов" },
-            { big: "🔓", t: "уровни открываются" },
-          ].map((s) => (
+          {([
+            { icon: "fire", t: "streak за активность" },
+            { icon: "chart", t: "статистика по темам" },
+            { icon: "trophy", t: "история экзаменов" },
+            { icon: "unlock", t: "уровни открываются" },
+          ] as { icon: IconName; t: string }[]).map((s) => (
             <div key={s.t} className="rounded-2xl bg-white/5 p-4 text-center">
-              <div className="text-2xl">{s.big}</div>
-              <div className="mt-1 text-sm text-white/75">{s.t}</div>
+              <Icon name={s.icon} className="mx-auto h-7 w-7 text-[var(--accent)]" />
+              <div className="mt-2 text-sm text-white/75">{s.t}</div>
             </div>
           ))}
         </div>
@@ -121,13 +128,15 @@ print(a + b)`}
         <h2 className="section-title mb-1 text-2xl">Два языка, три уровня</h2>
         <p className="muted mb-6">От основ до продвинутого — с экзаменом на каждом переходе.</p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {[
-            { lang: "Python", icon: "🐍", text: "От переменных и циклов до нейросетей и автоматизации." },
-            { lang: "C++", icon: "＋＋", text: "От синтаксиса до алгоритмов и олимпиадных задач." },
-          ].map((c) => (
+          {([
+            { lang: "Python", icon: "python", text: "От переменных и циклов до нейросетей и автоматизации." },
+            { lang: "C++", icon: "cpp", text: "От синтаксиса до алгоритмов и олимпиадных задач." },
+          ] as { lang: string; icon: IconName; text: string }[]).map((c) => (
             <div key={c.lang} className="card p-6">
               <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--surface-2)] text-lg font-black">{c.icon}</span>
+                <span className="grid h-11 w-11 place-items-center rounded-xl bg-[var(--surface-2)]">
+                  <Icon name={c.icon} className="h-7 w-7" />
+                </span>
                 <div>
                   <div className="text-lg font-extrabold">{c.lang}</div>
                   <div className="muted text-sm">{c.text}</div>
@@ -161,7 +170,9 @@ print(a + b)`}
             "Прогресс группы и разбор западающих тем",
           ].map((t) => (
             <div key={t} className="flex items-center gap-3 rounded-2xl surface-2 p-4">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--accent)] font-black text-[var(--accent-fg)]">✓</span>
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-[var(--accent-fg)]">
+                <Icon name="check" className="h-4 w-4" strokeWidth={2.6} />
+              </span>
               <span className="text-sm font-semibold">{t}</span>
             </div>
           ))}

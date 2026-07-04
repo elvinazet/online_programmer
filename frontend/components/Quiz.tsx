@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { PublicQuestion, QuizResult } from "@/lib/types";
 
+import { Icon } from "./Icon";
 import Markdown from "./Markdown";
 import { Spinner } from "./ui";
 
@@ -130,8 +131,9 @@ export default function Quiz({
           {busy && <Spinner />} Отправить ответы
         </button>
       ) : (
-        <div className={`card p-4 font-medium ${result.passed ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
-          Результат: {result.score}% — {result.passed ? "урок пройден! 🎉" : "нужно ≥ 60%, попробуйте ещё раз"}
+        <div className={`card flex items-center gap-2 p-4 font-medium ${result.passed ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
+          <Icon name={result.passed ? "check-badge" : "warning"} className="h-5 w-5 shrink-0" />
+          <span>Результат: {result.score}% — {result.passed ? "урок пройден!" : "нужно ≥ 60%, попробуйте ещё раз"}</span>
         </div>
       )}
     </div>
