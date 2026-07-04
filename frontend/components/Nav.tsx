@@ -4,10 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { useAuth } from "@/lib/auth";
 
-import ThemeToggle from "./ThemeToggle";
-
 const LINKS = [
-  { href: "/", label: "Курсы" },
+  { href: "/courses", label: "Курсы" },
   { href: "/problems", label: "Задачи" },
   { href: "/exams", label: "Экзамены" },
 ];
@@ -17,52 +15,53 @@ export default function Nav() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isActive = (href: string) => pathname.startsWith(href);
 
   return (
-    <nav className="nav-blur sticky top-0 z-30 border-b">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-3">
+    <nav className="nav-blur sticky top-0 z-30 border-b border-[var(--border)]">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3">
         <div className="flex items-center gap-1">
-          <Link href="/" className="mr-3 flex items-center gap-2 font-semibold">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-[var(--primary)] text-[var(--primary-fg)]">
-              ⟨⟩
+          <Link href="/" className="mr-3 flex items-center gap-2 text-lg font-black tracking-tight">
+            <span className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--ink)] font-mono text-sm text-[var(--accent)]">
+              &lt;/&gt;
             </span>
-            <span className="hidden sm:inline">Online Programmer</span>
+            <span>onproger</span>
           </Link>
-          {user &&
-            LINKS.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`rounded-lg px-3 py-1.5 text-sm transition ${
-                  isActive(l.href) ? "bg-[var(--surface-2)] font-medium" : "muted hover:text-[var(--text)]"
-                }`}
-              >
-                {l.label}
-              </Link>
-            ))}
-          {user?.role === "teacher" && (
-            <Link
-              href="/teach"
-              className={`rounded-lg px-3 py-1.5 text-sm transition ${
-                isActive("/teach") ? "bg-[var(--surface-2)] font-medium" : "muted hover:text-[var(--text)]"
-              }`}
-            >
-              Преподавание
-            </Link>
+          {user && (
+            <div className="hidden items-center gap-1 md:flex">
+              {LINKS.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-bold transition ${
+                    isActive(l.href) ? "bg-[var(--accent)] text-[var(--accent-fg)]" : "muted hover:text-[var(--text)]"
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              {user.role === "teacher" && (
+                <Link
+                  href="/teach"
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-bold transition ${
+                    isActive("/teach") ? "bg-[var(--accent)] text-[var(--accent-fg)]" : "muted hover:text-[var(--text)]"
+                  }`}
+                >
+                  Преподавание
+                </Link>
+              )}
+            </div>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           {user ? (
             <>
               <Link
                 href="/me"
-                className="hidden items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-[var(--surface-2)] sm:flex"
+                className="hidden items-center gap-2 rounded-full px-2 py-1 text-sm hover:bg-[var(--surface-2)] sm:flex"
               >
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--surface-2)] text-xs font-semibold uppercase">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--primary)] text-xs font-black uppercase text-white">
                   {user.email.slice(0, 2)}
                 </span>
                 <span className="badge">{user.role === "teacher" ? "учитель" : "ученик"}</span>
@@ -82,8 +81,8 @@ export default function Nav() {
               <Link href="/login" className="btn btn-ghost btn-sm">
                 Вход
               </Link>
-              <Link href="/register" className="btn btn-primary btn-sm">
-                Регистрация
+              <Link href="/register" className="btn btn-accent btn-sm">
+                Начать бесплатно
               </Link>
             </>
           )}

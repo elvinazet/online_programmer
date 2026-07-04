@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Приложение
-    app_name: str = "Online Programmer"
+    app_name: str = "onproger"
     environment: str = "development"
     frontend_url: str = "http://localhost:3000"
 
