@@ -5,6 +5,8 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Submission, SubmissionStatus } from "@/lib/types";
 
+import { Spinner } from "./ui";
+
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 const STATUS_LABEL: Record<SubmissionStatus, string> = {
@@ -16,6 +18,16 @@ const STATUS_LABEL: Record<SubmissionStatus, string> = {
   mle: "Превышена память",
   runtime_error: "Ошибка выполнения",
   compile_error: "Ошибка компиляции",
+};
+const STATUS_BADGE: Record<SubmissionStatus, string> = {
+  queued: "badge",
+  running: "badge badge-warning",
+  accepted: "badge badge-success",
+  wrong_answer: "badge badge-danger",
+  tle: "badge badge-danger",
+  mle: "badge badge-danger",
+  runtime_error: "badge badge-danger",
+  compile_error: "badge badge-danger",
 };
 
 const TERMINAL: SubmissionStatus[] = [
@@ -61,7 +73,6 @@ export default function SubmitPanel({
         : `/problems/${problemId}/submissions`;
       let result = await api.post<Submission>(path, { language, source_code: code });
       setSubmission(result);
-      // опрос вердикта (в проде судья асинхронный через Celery)
       let tries = 0;
       while (!TERMINAL.includes(result.status) && tries < 30) {
         await sleep(1200);
@@ -77,29 +88,19 @@ export default function SubmitPanel({
     }
   }
 
-  const accepted = submission?.status === "accepted";
-
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3">
-        <select
-          value={language}
-          onChange={(e) => changeLanguage(e.target.value as "python" | "cpp")}
-          className="rounded border border-slate-300 px-3 py-1.5"
-        >
+      <div className="flex items-center gap-2">
+        <select value={language} onChange={(e) => changeLanguage(e.target.value as "python" | "cpp")} className="select w-40">
           <option value="python">Python</option>
           <option value="cpp">C++</option>
         </select>
-        <button
-          onClick={submit}
-          disabled={busy}
-          className="rounded bg-indigo-600 px-4 py-1.5 font-medium text-white disabled:opacity-50"
-        >
-          {busy ? "Проверяется…" : "Отправить решение"}
+        <button onClick={submit} disabled={busy} className="btn btn-primary">
+          {busy && <Spinner />} Отправить решение
         </button>
       </div>
 
-      <div className="overflow-hidden rounded border border-slate-700">
+      <div className="overflow-hidden rounded-xl border">
         <MonacoEditor
           height="320px"
           language={language}
@@ -110,27 +111,21 @@ export default function SubmitPanel({
         />
       </div>
 
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <div className="badge badge-danger px-3 py-2">{error}</div>}
 
       {submission && (
-        <div
-          className={`rounded p-3 ${
-            accepted ? "bg-emerald-50 text-emerald-700" : "bg-slate-50 text-slate-700"
-          }`}
-        >
-          <div className="font-medium">
-            {STATUS_LABEL[submission.status]}
+        <div className="card p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={STATUS_BADGE[submission.status]}>{STATUS_LABEL[submission.status]}</span>
             {submission.total_tests > 0 && (
-              <span className="ml-2 text-sm">
-                ({submission.passed_tests}/{submission.total_tests} тестов, {submission.score}%)
+              <span className="muted text-sm">
+                {submission.passed_tests}/{submission.total_tests} тестов · {submission.score}%
               </span>
             )}
-            {submission.time_ms != null && (
-              <span className="ml-2 text-sm text-slate-500">{submission.time_ms} мс</span>
-            )}
+            {submission.time_ms != null && <span className="muted text-sm">{submission.time_ms} мс</span>}
           </div>
           {submission.compile_output && (
-            <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-slate-900 p-2 text-xs text-rose-200">
+            <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-900 p-2 text-xs text-rose-200">
               {submission.compile_output}
             </pre>
           )}

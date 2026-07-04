@@ -1,10 +1,12 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import CodeRunner from "@/components/CodeRunner";
 import Markdown from "@/components/Markdown";
 import Quiz from "@/components/Quiz";
+import { PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { LessonDetail } from "@/lib/types";
@@ -24,35 +26,35 @@ export default function LessonPage({ params }: { params: { id: string } }) {
     api.get<LessonDetail>(`/lessons/${params.id}`).then(setLesson).catch((e) => setError(e.message));
   }, [user, loading, router, params.id]);
 
-  if (loading || !user) return <p className="text-slate-500">Загрузка…</p>;
-  if (error) return <p className="text-rose-600">{error}</p>;
-  if (!lesson) return <p className="text-slate-500">Загрузка урока…</p>;
+  if (loading || !user) return <PageLoader />;
+  if (error) return <div className="badge badge-danger px-3 py-2">{error}</div>;
+  if (!lesson) return <PageLoader label="Загрузка урока…" />;
 
   return (
-    <article>
-      <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-        {lesson.progress?.status === "completed" && (
-          <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">пройдено</span>
-        )}
+    <article className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="page-title">{lesson.title}</h1>
+        {lesson.progress?.status === "completed" && <span className="badge badge-success">пройдено</span>}
       </div>
 
-      <Markdown>{lesson.content_md}</Markdown>
+      <div className="card p-6">
+        <Markdown>{lesson.content_md}</Markdown>
+      </div>
 
-      <section className="mt-8">
-        <h2 className="mb-2 text-lg font-semibold">Песочница</h2>
-        <p className="mb-2 text-sm text-slate-500">
-          Попробуйте код прямо в браузере (Python запускается через Pyodide).
-        </p>
+      <section>
+        <h2 className="section-title mb-1">Песочница</h2>
+        <p className="muted mb-3 text-sm">Запустите Python прямо в браузере (Pyodide).</p>
         <CodeRunner initialCode={'print("Привет, мир!")'} language="python" />
       </section>
 
       {user.role === "student" && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">Мини-квиз</h2>
+        <section>
+          <h2 className="section-title mb-3">Мини-квиз</h2>
           <Quiz lessonId={lesson.id} questions={lesson.questions} />
         </section>
       )}
+
+      <Link href="/" className="link inline-block text-sm">← К курсам</Link>
     </article>
   );
 }

@@ -13,8 +13,9 @@ from app.models.problem import Problem, ProblemSource, ProblemTag, ProblemTest
 from app.models.quiz import LessonQuestion, Question, QuestionType
 from app.models.user import StudentProfile, TeacherProfile, User, UserRole
 
-TEACHER_EMAIL = "teacher@demo.local"
-STUDENT_EMAIL = "student@demo.local"
+# .local — зарезервированный домен, его отклоняет email-валидатор, поэтому example.com
+TEACHER_EMAIL = "teacher@example.com"
+STUDENT_EMAIL = "student@example.com"
 DEMO_PASSWORD = "password123"
 
 

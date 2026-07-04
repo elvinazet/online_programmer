@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { useToast } from "@/components/Toast";
+import { EmptyState, PageHeader, PageLoader, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { AttemptDetail, Exam } from "@/lib/types";
@@ -10,16 +12,13 @@ import type { AttemptDetail, Exam } from "@/lib/types";
 export default function ExamsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [exams, setExams] = useState<Exam[]>([]);
+  const toast = useToast();
+  const [exams, setExams] = useState<Exam[] | null>(null);
   const [title, setTitle] = useState("");
-  const [error, setError] = useState("");
+  const [starting, setStarting] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    try {
-      setExams(await api.get<Exam[]>("/exams"));
-    } catch (e: any) {
-      setError(e.message);
-    }
+    setExams(await api.get<Exam[]>("/exams"));
   }, []);
 
   useEffect(() => {
@@ -28,18 +27,19 @@ export default function ExamsPage() {
       router.replace("/login");
       return;
     }
-    load();
+    load().catch(() => setExams([]));
   }, [user, loading, router, load]);
 
-  if (loading || !user) return <p className="text-slate-500">Загрузка…</p>;
+  if (loading || !user) return <PageLoader />;
 
   async function start(examId: number) {
-    setError("");
+    setStarting(examId);
     try {
       const attempt = await api.post<AttemptDetail>(`/exams/${examId}/attempts`);
       router.push(`/attempts/${attempt.id}`);
     } catch (e: any) {
-      setError(e.message);
+      toast.error(e.message);
+      setStarting(null);
     }
   }
 
@@ -47,58 +47,52 @@ export default function ExamsPage() {
     if (!title.trim()) return;
     await api.post("/exams", { title });
     setTitle("");
+    toast.success("Экзамен создан");
     load();
   }
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-semibold">Экзамены</h1>
-      {error && <p className="text-rose-600">{error}</p>}
+    <div>
+      <PageHeader title="Экзамены" subtitle="Контесты на время: практика + теория с разбором" />
 
       {user.role === "teacher" && (
-        <div className="flex gap-2">
-          <input
-            placeholder="Название экзамена"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="rounded border border-slate-300 px-3 py-2"
-          />
-          <button onClick={createExam} className="rounded bg-indigo-600 px-4 py-2 text-white">
-            Создать
-          </button>
+        <div className="card mb-5 flex gap-2 p-4">
+          <input placeholder="Название нового экзамена" value={title} onChange={(e) => setTitle(e.target.value)} className="input flex-1" />
+          <button onClick={createExam} className="btn btn-primary">Создать</button>
         </div>
       )}
 
-      <div className="space-y-2">
-        {exams.map((ex) => (
-          <div
-            key={ex.id}
-            className="flex items-center justify-between rounded border border-slate-200 bg-white p-4"
-          >
-            <div>
-              <div className="font-medium">{ex.title}</div>
-              <div className="text-sm text-slate-500">
-                {Math.round(ex.duration_seconds / 60)} мин · порог{" "}
-                {Math.round(ex.pass_threshold * 100)}%
-                {user.role === "teacher" && (ex.is_published ? " · опубликован" : " · черновик")}
+      {exams === null ? (
+        <PageLoader />
+      ) : exams.length === 0 ? (
+        <EmptyState icon="🏁" title="Экзаменов пока нет" />
+      ) : (
+        <div className="space-y-3">
+          {exams.map((ex) => (
+            <div key={ex.id} className="card flex items-center justify-between p-5">
+              <div>
+                <div className="font-medium">{ex.title}</div>
+                <div className="muted mt-1 flex flex-wrap gap-2 text-sm">
+                  <span className="badge">{Math.round(ex.duration_seconds / 60)} мин</span>
+                  <span className="badge">порог {Math.round(ex.pass_threshold * 100)}%</span>
+                  {user.role === "teacher" && (
+                    <span className={ex.is_published ? "badge badge-success" : "badge badge-warning"}>
+                      {ex.is_published ? "опубликован" : "черновик"}
+                    </span>
+                  )}
+                </div>
               </div>
+              {user.role === "student" ? (
+                <button onClick={() => start(ex.id)} disabled={starting === ex.id} className="btn btn-success">
+                  {starting === ex.id && <Spinner />} Начать
+                </button>
+              ) : (
+                <Link href={`/exams/${ex.id}`} className="btn btn-ghost">Настроить</Link>
+              )}
             </div>
-            {user.role === "student" ? (
-              <button
-                onClick={() => start(ex.id)}
-                className="rounded bg-emerald-600 px-4 py-2 text-white"
-              >
-                Начать
-              </button>
-            ) : (
-              <Link href={`/exams/${ex.id}`} className="text-indigo-600 underline">
-                Настроить
-              </Link>
-            )}
-          </div>
-        ))}
-        {exams.length === 0 && <p className="text-slate-500">Экзаменов пока нет.</p>}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

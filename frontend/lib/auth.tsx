@@ -1,14 +1,14 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-import { api, clearTokens, getAccess, setTokens } from "./api";
+import { api, clearTokens, getAccess, getRefresh, setTokens } from "./api";
 import type { User } from "./types";
 
 interface AuthState {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -50,7 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [refresh],
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const refresh = getRefresh();
+    if (refresh) {
+      try {
+        await api.post("/auth/logout", { refresh_token: refresh });
+      } catch {
+        /* локальный выход в любом случае */
+      }
+    }
     clearTokens();
     setUser(null);
   }, []);

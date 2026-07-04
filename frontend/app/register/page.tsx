@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Role } from "@/lib/types";
 
@@ -36,70 +37,54 @@ export default function RegisterPage() {
 
   if (done) {
     return (
-      <div className="mx-auto max-w-sm">
-        <h1 className="mb-2 text-xl font-semibold">Почти готово</h1>
-        <p className="text-slate-600">
-          Мы отправили письмо для подтверждения email. В dev-режиме ссылка печатается
-          в лог контейнера <code>api</code>. После подтверждения{" "}
-          <Link href="/login" className="text-indigo-600 underline">
-            войдите
-          </Link>
-          .
-        </p>
+      <div className="mx-auto mt-8 max-w-sm">
+        <div className="card p-7 text-center">
+          <div className="text-3xl">📬</div>
+          <h1 className="page-title mt-2">Почти готово</h1>
+          <p className="muted mt-2 text-sm">
+            Мы отправили письмо для подтверждения email. В dev-режиме ссылка печатается
+            в лог контейнера <code>api</code>.
+          </p>
+          <Link href="/login" className="link mt-4 inline-block">Перейти ко входу</Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="mb-4 text-xl font-semibold">Регистрация</h1>
-      <form onSubmit={onSubmit} className="space-y-3">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        />
-        <input
-          type="password"
-          required
-          minLength={8}
-          placeholder="Пароль (мин. 8 символов)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        />
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as Role)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        >
-          <option value="student">Ученик</option>
-          <option value="teacher">Учитель</option>
-        </select>
-        <input
-          type="text"
-          placeholder={role === "teacher" ? "Имя (необязательно)" : "Codeforces-хэндл (необязательно)"}
-          value={extra}
-          onChange={(e) => setExtra(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        />
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button
-          disabled={busy}
-          className="w-full rounded bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {busy ? "Регистрируем…" : "Зарегистрироваться"}
-        </button>
-      </form>
-      <p className="mt-3 text-sm text-slate-600">
-        Уже есть аккаунт?{" "}
-        <Link href="/login" className="text-indigo-600 underline">
-          Войти
-        </Link>
-      </p>
+    <div className="mx-auto mt-8 max-w-sm">
+      <div className="card p-7">
+        <h1 className="page-title mb-1">Создать аккаунт</h1>
+        <p className="muted mb-5 text-sm">Начните учиться уже сегодня.</p>
+        <form onSubmit={onSubmit} className="space-y-3">
+          <div>
+            <label className="label">Email</label>
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label className="label">Пароль</label>
+            <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="минимум 8 символов" />
+          </div>
+          <div>
+            <label className="label">Роль</label>
+            <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="select">
+              <option value="student">Ученик</option>
+              <option value="teacher">Учитель</option>
+            </select>
+          </div>
+          <div>
+            <label className="label">{role === "teacher" ? "Имя (необязательно)" : "Codeforces-хэндл (необязательно)"}</label>
+            <input type="text" value={extra} onChange={(e) => setExtra(e.target.value)} className="input" />
+          </div>
+          {error && <div className="badge badge-danger w-full justify-start px-3 py-2">{error}</div>}
+          <button disabled={busy} className="btn btn-primary w-full">
+            {busy && <Spinner />} Зарегистрироваться
+          </button>
+        </form>
+        <p className="muted mt-4 text-sm">
+          Уже есть аккаунт? <Link href="/login" className="link">Войти</Link>
+        </p>
+      </div>
     </div>
   );
 }

@@ -13,10 +13,10 @@ export default function MarkdownEditor({
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-72 w-full rounded border border-slate-300 p-3 font-mono text-sm"
+        className="input h-72 font-mono"
         placeholder="Markdown урока…"
       />
-      <div className="h-72 overflow-auto rounded border border-slate-200 p-3">
+      <div className="card h-72 overflow-auto p-3">
         <Markdown>{value || "_Предпросмотр появится здесь_"}</Markdown>
       </div>
     </div>

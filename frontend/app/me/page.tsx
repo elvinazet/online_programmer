@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useToast } from "@/components/Toast";
+import { PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { ExamHistoryItem, Stats } from "@/lib/types";
@@ -10,10 +12,11 @@ import type { ExamHistoryItem, Stats } from "@/lib/types";
 export default function ProfilePage() {
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
+  const toast = useToast();
   const [handle, setHandle] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
   const [history, setHistory] = useState<ExamHistoryItem[]>([]);
-  const [msg, setMsg] = useState("");
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -28,108 +31,88 @@ export default function ProfilePage() {
     }
   }, [user, loading, router]);
 
-  if (loading || !user) return <p className="text-slate-500">Загрузка…</p>;
+  if (loading || !user) return <PageLoader />;
 
   async function link() {
-    setMsg("");
     try {
       await api.post("/codeforces/link", { handle });
       await refresh();
-      setMsg("Хэндл привязан");
+      toast.success("Хэндл привязан");
     } catch (e: any) {
-      setMsg(e.message);
+      toast.error(e.message);
     }
   }
-
   async function sync() {
-    setMsg("");
+    setSyncing(true);
     try {
       const r = await api.post<{ newly_solved: number }>("/codeforces/sync");
-      setMsg(`Синхронизировано. Новых решённых: ${r.newly_solved}`);
+      toast.success(`Синхронизировано. Новых решённых: ${r.newly_solved}`);
       setStats(await api.get<Stats>("/me/stats"));
     } catch (e: any) {
-      setMsg(e.message);
+      toast.error(e.message);
+    } finally {
+      setSyncing(false);
     }
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Профиль</h1>
-        <p className="text-slate-600">
-          {user.email} · {user.role === "teacher" ? "учитель" : "ученик"}
-        </p>
-      </div>
+      <PageHeader
+        title="Профиль"
+        subtitle={`${user.email} · ${user.role === "teacher" ? "учитель" : "ученик"}`}
+      />
 
       {user.role === "student" && (
         <>
-          <section className="rounded border border-slate-200 bg-white p-4">
-            <h2 className="mb-2 font-semibold">Codeforces</h2>
+          <section className="card p-5">
+            <h2 className="section-title mb-3">Codeforces</h2>
             <div className="flex flex-wrap gap-2">
-              <input
-                placeholder="хэндл"
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
-                className="rounded border border-slate-300 px-3 py-1.5"
-              />
-              <button onClick={link} className="rounded bg-slate-700 px-4 py-1.5 text-white">
-                Привязать
-              </button>
-              <button onClick={sync} className="rounded bg-indigo-600 px-4 py-1.5 text-white">
-                Синхронизировать решённое
+              <input placeholder="хэндл" value={handle} onChange={(e) => setHandle(e.target.value)} className="input w-48" />
+              <button onClick={link} className="btn btn-ghost">Привязать</button>
+              <button onClick={sync} disabled={syncing} className="btn btn-primary">
+                {syncing ? "Синхронизация…" : "Синхронизировать решённое"}
               </button>
             </div>
-            {msg && <p className="mt-2 text-sm text-slate-600">{msg}</p>}
           </section>
 
-          <section className="rounded border border-slate-200 bg-white p-4">
-            <h2 className="mb-3 font-semibold">Прогресс</h2>
+          <section className="card p-5">
+            <h2 className="section-title mb-3">Прогресс</h2>
             {stats ? (
-              <div className="space-y-3">
-                <div className="text-lg">
-                  Решено задач: <span className="font-semibold">{stats.solved_total}</span>
-                </div>
+              <div className="space-y-4">
+                <div className="text-lg">Решено задач: <span className="font-semibold">{stats.solved_total}</span></div>
                 <StatBars title="По темам" data={stats.by_tag} />
                 <StatBars title="По сложности" data={stats.by_rating} />
               </div>
             ) : (
-              <p className="text-slate-500">Пока нет данных.</p>
+              <p className="muted">Пока нет данных.</p>
             )}
           </section>
 
-          <section className="rounded border border-slate-200 bg-white p-4">
-            <h2 className="mb-3 font-semibold">История экзаменов</h2>
+          <section className="card p-5">
+            <h2 className="section-title mb-3">История экзаменов</h2>
             {history.length === 0 ? (
-              <p className="text-slate-500">Пока нет завершённых экзаменов.</p>
+              <p className="muted">Пока нет завершённых экзаменов.</p>
             ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200 text-left text-slate-500">
-                    <th className="py-1">Экзамен</th>
-                    <th>Попытка</th>
-                    <th>Итог</th>
-                    <th>Статус</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((a) => (
-                    <tr key={a.attempt_id} className="border-b border-slate-100">
-                      <td className="py-1">{a.exam_title}</td>
-                      <td>{a.attempt_number}</td>
-                      <td>{a.total_score}%</td>
-                      <td className={a.passed ? "text-emerald-600" : "text-rose-600"}>
-                        {a.passed ? "сдан" : "не сдан"}
-                      </td>
-                      <td>
-                        <Link href={`/attempts/${a.attempt_id}`} className="text-indigo-600 underline">
-                          разбор
-                        </Link>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="table-row muted text-left">
+                      <th className="py-2">Экзамен</th><th>Попытка</th><th>Итог</th><th>Статус</th><th></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {history.map((a) => (
+                      <tr key={a.attempt_id} className="table-row last:border-0">
+                        <td className="py-2">{a.exam_title}</td>
+                        <td>{a.attempt_number}</td>
+                        <td className="font-medium">{a.total_score}%</td>
+                        <td><span className={a.passed ? "badge badge-success" : "badge badge-danger"}>{a.passed ? "сдан" : "не сдан"}</span></td>
+                        <td><Link href={`/attempts/${a.attempt_id}`} className="link">разбор</Link></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </section>
         </>
@@ -144,16 +127,13 @@ function StatBars({ title, data }: { title: string; data: Record<string, number>
   if (entries.length === 0) return null;
   return (
     <div>
-      <div className="mb-1 text-sm font-medium text-slate-600">{title}</div>
-      <div className="space-y-1">
+      <div className="muted mb-1 text-sm font-medium">{title}</div>
+      <div className="space-y-1.5">
         {entries.map(([label, value]) => (
           <div key={label} className="flex items-center gap-2 text-sm">
-            <span className="w-28 shrink-0 text-slate-500">{label}</span>
-            <div className="h-4 flex-1 rounded bg-slate-100">
-              <div
-                className="h-4 rounded bg-indigo-500"
-                style={{ width: `${(value / max) * 100}%` }}
-              />
+            <span className="muted w-28 shrink-0">{label}</span>
+            <div className="h-2.5 flex-1 rounded-full surface-2">
+              <div className="h-2.5 rounded-full" style={{ width: `${(value / max) * 100}%`, background: "var(--primary)" }} />
             </div>
             <span className="w-8 text-right">{value}</span>
           </div>

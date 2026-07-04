@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Spinner } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginPage() {
@@ -28,40 +29,28 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="mb-4 text-xl font-semibold">Вход</h1>
-      <form onSubmit={onSubmit} className="space-y-3">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        />
-        <input
-          type="password"
-          required
-          placeholder="Пароль"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        />
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button
-          disabled={busy}
-          className="w-full rounded bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {busy ? "Входим…" : "Войти"}
-        </button>
-      </form>
-      <div className="mt-3 flex justify-between text-sm text-slate-600">
-        <Link href="/register" className="hover:text-slate-900">
-          Регистрация
-        </Link>
-        <Link href="/forgot-password" className="hover:text-slate-900">
-          Забыли пароль?
-        </Link>
+    <div className="mx-auto mt-8 max-w-sm">
+      <div className="card p-7">
+        <h1 className="page-title mb-1">С возвращением</h1>
+        <p className="muted mb-5 text-sm">Войдите, чтобы продолжить обучение.</p>
+        <form onSubmit={onSubmit} className="space-y-3">
+          <div>
+            <label className="label">Email</label>
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label className="label">Пароль</label>
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="••••••••" />
+          </div>
+          {error && <div className="badge badge-danger w-full justify-start px-3 py-2">{error}</div>}
+          <button disabled={busy} className="btn btn-primary w-full">
+            {busy && <Spinner />} Войти
+          </button>
+        </form>
+        <div className="mt-4 flex justify-between text-sm">
+          <Link href="/register" className="link">Регистрация</Link>
+          <Link href="/forgot-password" className="link">Забыли пароль?</Link>
+        </div>
       </div>
     </div>
   );

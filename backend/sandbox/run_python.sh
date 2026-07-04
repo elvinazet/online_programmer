@@ -12,4 +12,8 @@ fi
 
 [ "$MODE" = "compile" ] && exit 0
 
-exec timeout "${TIME_LIMIT:-2}" python3 /work/main.py
+# Запуск с ограничением объёма вывода (≤1MB), сохраняя код выхода программы.
+timeout "${TIME_LIMIT:-2}" python3 /work/main.py > /work/out 2>/dev/null
+code=$?
+head -c 1000000 /work/out
+exit $code

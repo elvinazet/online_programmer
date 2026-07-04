@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import AnalysisView from "@/components/AnalysisView";
 import Markdown from "@/components/Markdown";
 import SubmitPanel from "@/components/SubmitPanel";
+import { PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { AttemptDetail } from "@/lib/types";
@@ -39,7 +40,6 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
     refresh().catch((e) => setError(e.message));
   }, [user, loading, router, refresh]);
 
-  // серверный таймер: локальный отсчёт, при нуле — перезапрос (сервер завершит)
   useEffect(() => {
     if (!attempt || attempt.status !== "in_progress") return;
     if (remaining <= 0) {
@@ -50,28 +50,22 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
     return () => clearTimeout(t);
   }, [attempt, remaining, refresh]);
 
-  // античит: фиксируем потерю/возврат фокуса вкладки
   useEffect(() => {
     if (!attempt || attempt.status !== "in_progress") return;
     const onVis = () => {
-      api
-        .post(`/attempts/${attemptId}/events`, {
-          type: document.hidden ? "focus_lost" : "focus_gained",
-        })
-        .catch(() => {});
+      api.post(`/attempts/${attemptId}/events`, {
+        type: document.hidden ? "focus_lost" : "focus_gained",
+      }).catch(() => {});
     };
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [attempt, attemptId]);
 
-  if (loading || !user || !attempt) return <p className="text-slate-500">Загрузка…</p>;
+  if (loading || !user || !attempt) return <PageLoader />;
 
   async function saveAnswers(next: Record<number, unknown>) {
     const payload = {
-      answers: attempt!.questions.map((q) => ({
-        attempt_question_id: q.id,
-        answer: next[q.id] ?? null,
-      })),
+      answers: attempt!.questions.map((q) => ({ attempt_question_id: q.id, answer: next[q.id] ?? null })),
     };
     try {
       await api.patch(`/attempts/${attemptId}/answers`, payload);
@@ -79,7 +73,6 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
       /* автосохранение best-effort */
     }
   }
-
   function setAnswer(qid: number, value: unknown) {
     const next = { ...answers, [qid]: value };
     setAnswers(next);
@@ -87,14 +80,10 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
   }
   function toggleMulti(qid: number, idx: number) {
     const cur = (answers[qid] as number[]) || [];
-    const next = {
-      ...answers,
-      [qid]: cur.includes(idx) ? cur.filter((i) => i !== idx) : [...cur, idx],
-    };
+    const next = { ...answers, [qid]: cur.includes(idx) ? cur.filter((i) => i !== idx) : [...cur, idx] };
     setAnswers(next);
     saveAnswers(next);
   }
-
   async function submit() {
     try {
       setAttempt(await api.post<AttemptDetail>(`/attempts/${attemptId}/submit`));
@@ -103,37 +92,22 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
     }
   }
 
-  // экран результата
   if (attempt.status !== "in_progress" && attempt.result) {
     const r = attempt.result;
     return (
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-3 text-center text-2xl font-semibold">
+        <h1 className="page-title mb-3 text-center">
           {attempt.status === "timed_out" ? "Время вышло" : "Экзамен завершён"}
         </h1>
-        <div
-          className={`rounded p-4 text-center text-lg ${
-            r.passed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
-          }`}
-        >
+        <div className={`card p-5 text-center text-lg ${r.passed ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
           Итог: {r.total_score}% — {r.passed ? "сдано 🎉" : "не сдано"}
-          <div className="mt-2 text-sm text-slate-600">
-            Практика: {r.practical_score}% · Теория: {r.theory_score}%
-          </div>
+          <div className="muted mt-2 text-sm">Практика: {r.practical_score}% · Теория: {r.theory_score}%</div>
           {!r.passed && r.next_retake_allowed_at && (
-            <div className="mt-2 text-sm text-slate-500">
-              Пересдача после: {new Date(r.next_retake_allowed_at).toLocaleString()}
-            </div>
+            <div className="muted mt-2 text-sm">Пересдача после: {new Date(r.next_retake_allowed_at).toLocaleString()}</div>
           )}
         </div>
-
-        <div className="mt-6">
-          <AnalysisView attemptId={attemptId} />
-        </div>
-
-        <Link href="/exams" className="mt-6 inline-block text-indigo-600 underline">
-          К экзаменам
-        </Link>
+        <div className="mt-6"><AnalysisView attemptId={attemptId} /></div>
+        <Link href="/exams" className="link mt-6 inline-block text-sm">← К экзаменам</Link>
       </div>
     );
   }
@@ -144,24 +118,22 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="space-y-8">
-      <div className="sticky top-0 z-10 -mx-6 flex items-center justify-between border-b border-slate-200 bg-white/90 px-6 py-2 backdrop-blur">
+      <div className="nav-blur sticky top-16 z-20 -mx-5 flex items-center justify-between border-y px-5 py-2.5">
         <span className="font-semibold">Экзамен · попытка {attempt.attempt_number}</span>
-        <span className={`font-mono text-lg ${lowTime ? "text-rose-600" : "text-slate-700"}`}>
-          {mm}:{ss}
-        </span>
+        <span className={`font-mono text-lg ${lowTime ? "text-[var(--danger)]" : ""}`}>{mm}:{ss}</span>
       </div>
 
-      {error && <p className="text-rose-600">{error}</p>}
+      {error && <div className="badge badge-danger px-3 py-2">{error}</div>}
 
       {attempt.problems.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Практика</h2>
+          <h2 className="section-title mb-3">Практика</h2>
           <div className="space-y-6">
             {attempt.problems.map((p) => (
-              <div key={p.id} className="rounded border border-slate-200 p-4">
+              <div key={p.id} className="card p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <span className="font-medium">{p.title}</span>
-                  <span className="text-sm text-slate-500">лучший балл: {p.best_score}%</span>
+                  <span className="badge">лучший балл: {p.best_score}%</span>
                 </div>
                 <SubmitPanel problemId={p.problem_id} attemptId={attemptId} onResult={refresh} />
               </div>
@@ -172,41 +144,28 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
 
       {attempt.questions.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Теория</h2>
-          <div className="space-y-5">
+          <h2 className="section-title mb-3">Теория</h2>
+          <div className="space-y-4">
             {attempt.questions.map((q, i) => (
-              <div key={q.id} className="rounded border border-slate-200 p-4">
-                <div className="mb-2 font-medium">
-                  {i + 1}. <Markdown>{q.prompt_md}</Markdown>
+              <div key={q.id} className="card p-4">
+                <div className="mb-2 flex gap-2 font-medium">
+                  <span className="badge badge-primary h-6 w-6 justify-center rounded-full p-0">{i + 1}</span>
+                  <div className="flex-1"><Markdown>{q.prompt_md}</Markdown></div>
                 </div>
                 {(q.type === "single_choice" || q.type === "multiple_choice") &&
                   (q.options || []).map((opt, idx) => (
-                    <label key={idx} className="flex items-center gap-2">
+                    <label key={idx} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-[var(--surface-2)]">
                       <input
                         type={q.type === "single_choice" ? "radio" : "checkbox"}
                         name={`q-${q.id}`}
-                        checked={
-                          q.type === "single_choice"
-                            ? answers[q.id] === idx
-                            : ((answers[q.id] as number[]) || []).includes(idx)
-                        }
-                        onChange={() =>
-                          q.type === "single_choice"
-                            ? setAnswer(q.id, idx)
-                            : toggleMulti(q.id, idx)
-                        }
+                        checked={q.type === "single_choice" ? answers[q.id] === idx : ((answers[q.id] as number[]) || []).includes(idx)}
+                        onChange={() => (q.type === "single_choice" ? setAnswer(q.id, idx) : toggleMulti(q.id, idx))}
                       />
                       <span>{opt}</span>
                     </label>
                   ))}
                 {(q.type === "short_answer" || q.type === "code_output") && (
-                  <input
-                    type="text"
-                    value={(answers[q.id] as string) || ""}
-                    onChange={(e) => setAnswer(q.id, e.target.value)}
-                    placeholder="Ваш ответ"
-                    className="w-full rounded border border-slate-300 px-3 py-1"
-                  />
+                  <input type="text" value={(answers[q.id] as string) || ""} onChange={(e) => setAnswer(q.id, e.target.value)} placeholder="Ваш ответ" className="input" />
                 )}
               </div>
             ))}
@@ -214,12 +173,7 @@ export default function AttemptPage({ params }: { params: { id: string } }) {
         </section>
       )}
 
-      <button
-        onClick={submit}
-        className="rounded bg-indigo-600 px-6 py-2 font-medium text-white"
-      >
-        Завершить экзамен
-      </button>
+      <button onClick={submit} className="btn btn-primary px-6">Завершить экзамен</button>
     </div>
   );
 }

@@ -15,6 +15,9 @@ from dataclasses import dataclass
 from app.core.config import settings
 from app.models.submission import SubmissionLanguage
 
+# Ограничение объёма вывода пользовательского кода (защита от «бомб» вывода).
+MAX_OUTPUT_BYTES = 1_000_000
+
 
 @dataclass
 class CompileResult:
@@ -89,7 +92,11 @@ class LocalSession:
         except subprocess.TimeoutExpired:
             return RunResult(stdout="", exit_code=-1, time_ms=time_limit_ms, timed_out=True)
         elapsed = int((time.monotonic() - start) * 1000)
-        return RunResult(stdout=proc.stdout, exit_code=proc.returncode, time_ms=elapsed)
+        return RunResult(
+            stdout=(proc.stdout or "")[:MAX_OUTPUT_BYTES],
+            exit_code=proc.returncode,
+            time_ms=elapsed,
+        )
 
     def close(self):
         shutil.rmtree(self.workdir, ignore_errors=True)

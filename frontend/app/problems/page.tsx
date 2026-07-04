@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { EmptyState, PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { Problem } from "@/lib/types";
@@ -10,25 +11,19 @@ import type { Problem } from "@/lib/types";
 export default function ProblemsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [problems, setProblems] = useState<Problem[]>([]);
+  const [problems, setProblems] = useState<Problem[] | null>(null);
   const [tags, setTags] = useState("");
   const [minRating, setMinRating] = useState("");
   const [maxRating, setMaxRating] = useState("");
   const [solved, setSolved] = useState("");
-  const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    setError("");
     const params = new URLSearchParams();
     if (tags.trim()) params.set("tags", tags.trim());
     if (minRating) params.set("min_rating", minRating);
     if (maxRating) params.set("max_rating", maxRating);
     if (solved) params.set("solved", solved);
-    try {
-      setProblems(await api.get<Problem[]>(`/problems?${params.toString()}`));
-    } catch (e: any) {
-      setError(e.message);
-    }
+    setProblems(await api.get<Problem[]>(`/problems?${params.toString()}`));
   }, [tags, minRating, maxRating, solved]);
 
   useEffect(() => {
@@ -37,81 +32,61 @@ export default function ProblemsPage() {
       router.replace("/login");
       return;
     }
-    load();
+    load().catch(() => setProblems([]));
   }, [user, loading, router, load]);
 
-  if (loading || !user) return <p className="text-slate-500">Загрузка…</p>;
+  if (loading || !user) return <PageLoader />;
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-semibold">Задачи</h1>
+      <PageHeader title="Задачи" subtitle="Практика с проверкой в изолированном sandbox" />
 
-      <div className="mb-4 flex flex-wrap items-end gap-2">
-        <input
-          placeholder="теги через запятую"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          className="rounded border border-slate-300 px-3 py-1.5"
-        />
-        <input
-          type="number"
-          placeholder="рейтинг от"
-          value={minRating}
-          onChange={(e) => setMinRating(e.target.value)}
-          className="w-28 rounded border border-slate-300 px-3 py-1.5"
-        />
-        <input
-          type="number"
-          placeholder="до"
-          value={maxRating}
-          onChange={(e) => setMaxRating(e.target.value)}
-          className="w-24 rounded border border-slate-300 px-3 py-1.5"
-        />
+      <div className="card mb-5 flex flex-wrap items-end gap-2 p-4">
+        <input placeholder="теги через запятую" value={tags} onChange={(e) => setTags(e.target.value)} className="input flex-1" style={{ minWidth: "10rem" }} />
+        <input type="number" placeholder="рейтинг от" value={minRating} onChange={(e) => setMinRating(e.target.value)} className="input w-32" />
+        <input type="number" placeholder="до" value={maxRating} onChange={(e) => setMaxRating(e.target.value)} className="input w-24" />
         {user.role === "student" && (
-          <select
-            value={solved}
-            onChange={(e) => setSolved(e.target.value)}
-            className="rounded border border-slate-300 px-3 py-1.5"
-          >
+          <select value={solved} onChange={(e) => setSolved(e.target.value)} className="select w-40">
             <option value="">все</option>
             <option value="true">решённые</option>
             <option value="false">нерешённые</option>
           </select>
         )}
-        <button onClick={load} className="rounded bg-indigo-600 px-4 py-1.5 text-white">
-          Фильтр
-        </button>
+        <button onClick={() => load()} className="btn btn-primary">Фильтр</button>
       </div>
 
-      {error && <p className="text-rose-600">{error}</p>}
-
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-slate-200 text-left text-slate-500">
-            <th className="py-2">Задача</th>
-            <th className="py-2">Рейтинг</th>
-            <th className="py-2">Теги</th>
-            <th className="py-2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {problems.map((p) => (
-            <tr key={p.id} className="border-b border-slate-100">
-              <td className="py-2">
-                <Link href={`/problems/${p.id}`} className="text-indigo-700 hover:underline">
-                  {p.title}
-                </Link>
-              </td>
-              <td className="py-2">{p.rating ?? "—"}</td>
-              <td className="py-2 text-slate-500">{p.tags.join(", ")}</td>
-              <td className="py-2">
-                {p.solved && <span className="text-emerald-600">✓ решено</span>}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {problems.length === 0 && <p className="mt-3 text-slate-500">Задач не найдено.</p>}
+      {problems === null ? (
+        <PageLoader />
+      ) : problems.length === 0 ? (
+        <EmptyState icon="🧩" title="Задач не найдено" hint="Измените фильтры или синхронизируйте задачи Codeforces." />
+      ) : (
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="table-row muted text-left">
+                  <th className="px-4 py-2.5">Задача</th>
+                  <th className="px-4 py-2.5">Рейтинг</th>
+                  <th className="px-4 py-2.5">Теги</th>
+                  <th className="px-4 py-2.5"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {problems.map((p) => (
+                  <tr key={p.id} className="table-row last:border-0 hover:bg-[var(--surface-2)]">
+                    <td className="px-4 py-2.5">
+                      <Link href={`/problems/${p.id}`} className="font-medium hover:text-[var(--primary)]">{p.title}</Link>
+                    </td>
+                    <td className="px-4 py-2.5 muted">{p.rating ?? "—"}</td>
+                    <td className="px-4 py-2.5 muted">{p.tags.join(", ")}</td>
+                    <td className="px-4 py-2.5">{p.solved && <span className="badge badge-success">✓ решено</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -47,8 +47,8 @@ docker compose exec api python -m app.seed   # демо-данные (по же�
 Приложение: **http://localhost** (через nginx). Swagger API: http://localhost/api… ,
 напрямую — http://localhost:8000/docs.
 
-**Демо-доступы после seed:** учитель `teacher@demo.local`, ученик
-`student@demo.local`, пароль `password123`.
+**Демо-доступы после seed:** учитель `teacher@example.com`, ученик
+`student@example.com`, пароль `password123`.
 
 ## Тесты и локальная разработка
 

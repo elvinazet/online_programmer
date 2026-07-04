@@ -41,6 +41,19 @@ def test_local_executor_runtime_error():
         session.close()
 
 
+def test_local_executor_caps_output():
+    from app.services.judge.executor import MAX_OUTPUT_BYTES, LocalExecutor
+
+    session = LocalExecutor().session(SubmissionLanguage.python, "print('x' * 2_000_000)\n")
+    try:
+        assert session.compile().ok
+        result = session.run("", 2000, 128)
+        assert result.timed_out is False
+        assert len(result.stdout) <= MAX_OUTPUT_BYTES
+    finally:
+        session.close()
+
+
 def test_auth_rate_limiter_fixed_window():
     import fakeredis
 

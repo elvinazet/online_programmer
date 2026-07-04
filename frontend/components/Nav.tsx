@@ -1,67 +1,93 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useAuth } from "@/lib/auth";
+
+import ThemeToggle from "./ThemeToggle";
+
+const LINKS = [
+  { href: "/", label: "Курсы" },
+  { href: "/problems", label: "Задачи" },
+  { href: "/exams", label: "Экзамены" },
+];
 
 export default function Nav() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <nav className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-      <div className="flex items-center gap-4">
-        <Link href="/" className="font-semibold text-indigo-700">
-          Online Programmer
-        </Link>
-        {user && (
-          <>
-            <Link href="/" className="text-sm text-slate-600 hover:text-slate-900">
-              Курсы
-            </Link>
-            <Link href="/problems" className="text-sm text-slate-600 hover:text-slate-900">
-              Задачи
-            </Link>
-            <Link href="/exams" className="text-sm text-slate-600 hover:text-slate-900">
-              Экзамены
-            </Link>
-            <Link href="/me" className="text-sm text-slate-600 hover:text-slate-900">
-              Профиль
-            </Link>
-          </>
-        )}
-        {user?.role === "teacher" && (
-          <Link href="/teach" className="text-sm text-slate-600 hover:text-slate-900">
-            Преподавание
-          </Link>
-        )}
-      </div>
-      <div className="flex items-center gap-3 text-sm">
-        {user ? (
-          <>
-            <span className="text-slate-500">
-              {user.email} · {user.role === "teacher" ? "учитель" : "ученик"}
+    <nav className="nav-blur sticky top-0 z-30 border-b">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-3">
+        <div className="flex items-center gap-1">
+          <Link href="/" className="mr-3 flex items-center gap-2 font-semibold">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-[var(--primary)] text-[var(--primary-fg)]">
+              ⟨⟩
             </span>
-            <button
-              onClick={() => {
-                logout();
-                router.push("/login");
-              }}
-              className="rounded border border-slate-300 px-3 py-1 hover:bg-slate-50"
+            <span className="hidden sm:inline">Online Programmer</span>
+          </Link>
+          {user &&
+            LINKS.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={`rounded-lg px-3 py-1.5 text-sm transition ${
+                  isActive(l.href) ? "bg-[var(--surface-2)] font-medium" : "muted hover:text-[var(--text)]"
+                }`}
+              >
+                {l.label}
+              </Link>
+            ))}
+          {user?.role === "teacher" && (
+            <Link
+              href="/teach"
+              className={`rounded-lg px-3 py-1.5 text-sm transition ${
+                isActive("/teach") ? "bg-[var(--surface-2)] font-medium" : "muted hover:text-[var(--text)]"
+              }`}
             >
-              Выйти
-            </button>
-          </>
-        ) : (
-          <>
-            <Link href="/login" className="hover:text-slate-900">
-              Вход
+              Преподавание
             </Link>
-            <Link href="/register" className="rounded bg-indigo-600 px-3 py-1 text-white">
-              Регистрация
-            </Link>
-          </>
-        )}
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {user ? (
+            <>
+              <Link
+                href="/me"
+                className="hidden items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-[var(--surface-2)] sm:flex"
+              >
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--surface-2)] text-xs font-semibold uppercase">
+                  {user.email.slice(0, 2)}
+                </span>
+                <span className="badge">{user.role === "teacher" ? "учитель" : "ученик"}</span>
+              </Link>
+              <button
+                onClick={async () => {
+                  await logout();
+                  router.push("/login");
+                }}
+                className="btn btn-ghost btn-sm"
+              >
+                Выйти
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="btn btn-ghost btn-sm">
+                Вход
+              </Link>
+              <Link href="/register" className="btn btn-primary btn-sm">
+                Регистрация
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

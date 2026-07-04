@@ -1,6 +1,8 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 
+import { Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
@@ -22,25 +24,19 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="mx-auto max-w-sm">
-      <h1 className="mb-4 text-xl font-semibold">Восстановление пароля</h1>
-      <form onSubmit={onSubmit} className="space-y-3">
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border border-slate-300 px-3 py-2"
-        />
-        <button
-          disabled={busy}
-          className="w-full rounded bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {busy ? "Отправляем…" : "Отправить ссылку"}
-        </button>
-      </form>
-      {message && <p className="mt-3 text-sm text-slate-600">{message}</p>}
+    <div className="mx-auto mt-8 max-w-sm">
+      <div className="card p-7">
+        <h1 className="page-title mb-1">Восстановление пароля</h1>
+        <p className="muted mb-5 text-sm">Пришлём ссылку для сброса на email.</p>
+        <form onSubmit={onSubmit} className="space-y-3">
+          <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="input" />
+          <button disabled={busy} className="btn btn-primary w-full">
+            {busy && <Spinner />} Отправить ссылку
+          </button>
+        </form>
+        {message && <p className="muted mt-3 text-sm">{message}</p>}
+        <Link href="/login" className="link mt-4 inline-block text-sm">← Ко входу</Link>
+      </div>
     </div>
   );
 }

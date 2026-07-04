@@ -58,7 +58,7 @@ export default function CodeRunner({
   }
 
   return (
-    <div className="my-4 rounded border border-slate-700 overflow-hidden">
+    <div className="overflow-hidden rounded-xl border">
       <MonacoEditor
         height="220px"
         language={language}
@@ -71,14 +71,14 @@ export default function CodeRunner({
         <button
           onClick={run}
           disabled={running}
-          className="rounded bg-emerald-600 px-3 py-1 text-sm font-medium text-white disabled:opacity-50"
+          className="btn btn-success btn-sm"
         >
           {running ? "Выполняется…" : "▶ Запустить"}
         </button>
         <span className="text-xs text-slate-400">{language === "python" ? "Python (Pyodide)" : "C++"}</span>
       </div>
       {output && (
-        <pre className="max-h-48 overflow-auto bg-black px-3 py-2 text-sm text-slate-100 whitespace-pre-wrap">
+        <pre className="max-h-48 overflow-auto whitespace-pre-wrap bg-black px-3 py-2 text-sm text-slate-100">
           {output}
         </pre>
       )}

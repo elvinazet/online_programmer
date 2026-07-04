@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import type { PublicQuestion, QuizResult } from "@/lib/types";
 
 import Markdown from "./Markdown";
+import { Spinner } from "./ui";
 
 export default function Quiz({
   lessonId,
@@ -56,24 +57,28 @@ export default function Quiz({
   }
 
   if (questions.length === 0) {
-    return <p className="text-sm text-slate-500">В этом уроке пока нет квиза.</p>;
+    return <p className="muted text-sm">В этом уроке пока нет квиза.</p>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {questions.map((q, i) => {
         const res = resultFor(q.id);
-        const border = res ? (res.is_correct ? "border-emerald-500" : "border-rose-500") : "border-slate-200";
+        const ring = res ? (res.is_correct ? "ring-1 ring-[var(--success)]" : "ring-1 ring-[var(--danger)]") : "";
         return (
-          <div key={q.id} className={`rounded border ${border} p-4`}>
-            <div className="mb-2 font-medium">
-              {i + 1}. <span className="inline-block"><Markdown>{q.prompt_md}</Markdown></span>
+          <div key={q.id} className={`card p-4 ${ring}`}>
+            <div className="mb-3 flex gap-2 font-medium">
+              <span className="badge badge-primary h-6 w-6 justify-center rounded-full p-0">{i + 1}</span>
+              <div className="flex-1"><Markdown>{q.prompt_md}</Markdown></div>
             </div>
 
             {(q.type === "single_choice" || q.type === "multiple_choice") && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {(q.options || []).map((opt, idx) => (
-                  <label key={idx} className="flex items-center gap-2">
+                  <label
+                    key={idx}
+                    className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-[var(--surface-2)]"
+                  >
                     <input
                       type={q.type === "single_choice" ? "radio" : "checkbox"}
                       name={`q-${q.id}`}
@@ -100,19 +105,17 @@ export default function Quiz({
                 value={(answers[q.id] as string) || ""}
                 onChange={(e) => setText(q.id, e.target.value)}
                 placeholder={q.type === "code_output" ? "Что выведет код?" : "Ваш ответ"}
-                className="w-full rounded border border-slate-300 px-3 py-1"
+                className="input"
               />
             )}
 
             {res && (
               <div className="mt-2 text-sm">
-                <span className={res.is_correct ? "text-emerald-600" : "text-rose-600"}>
+                <span className={res.is_correct ? "badge badge-success" : "badge badge-danger"}>
                   {res.is_correct ? "Верно" : "Неверно"}
                 </span>
                 {res.explanation_md && (
-                  <div className="mt-1 text-slate-600">
-                    <Markdown>{res.explanation_md}</Markdown>
-                  </div>
+                  <div className="muted mt-1"><Markdown>{res.explanation_md}</Markdown></div>
                 )}
               </div>
             )}
@@ -120,23 +123,15 @@ export default function Quiz({
         );
       })}
 
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <div className="badge badge-danger px-3 py-2">{error}</div>}
 
       {!result ? (
-        <button
-          onClick={submit}
-          disabled={busy}
-          className="rounded bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50"
-        >
-          {busy ? "Проверяем…" : "Отправить ответы"}
+        <button onClick={submit} disabled={busy} className="btn btn-primary">
+          {busy && <Spinner />} Отправить ответы
         </button>
       ) : (
-        <div
-          className={`rounded p-3 font-medium ${
-            result.passed ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
-          }`}
-        >
-          Результат: {result.score}% — {result.passed ? "урок пройден!" : "нужно ≥ 60%, попробуйте ещё раз"}
+        <div className={`card p-4 font-medium ${result.passed ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
+          Результат: {result.score}% — {result.passed ? "урок пройден! 🎉" : "нужно ≥ 60%, попробуйте ещё раз"}
         </div>
       )}
     </div>

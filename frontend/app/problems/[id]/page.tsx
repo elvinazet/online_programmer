@@ -1,9 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Markdown from "@/components/Markdown";
 import SubmitPanel from "@/components/SubmitPanel";
+import { PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { ProblemDetail } from "@/lib/types";
@@ -23,42 +25,42 @@ export default function ProblemPage({ params }: { params: { id: string } }) {
     api.get<ProblemDetail>(`/problems/${params.id}`).then(setProblem).catch((e) => setError(e.message));
   }, [user, loading, router, params.id]);
 
-  if (loading || !user) return <p className="text-slate-500">Загрузка…</p>;
-  if (error) return <p className="text-rose-600">{error}</p>;
-  if (!problem) return <p className="text-slate-500">Загрузка задачи…</p>;
+  if (loading || !user) return <PageLoader />;
+  if (error) return <div className="badge badge-danger px-3 py-2">{error}</div>;
+  if (!problem) return <PageLoader label="Загрузка задачи…" />;
 
   return (
-    <article>
-      <div className="mb-2 flex items-center gap-2">
-        <h1 className="text-2xl font-semibold">{problem.title}</h1>
-        {problem.solved && <span className="text-emerald-600">✓ решено</span>}
-      </div>
-      <div className="mb-4 text-sm text-slate-500">
-        {problem.rating && <span className="mr-3">Рейтинг: {problem.rating}</span>}
-        <span className="mr-3">Лимит: {problem.time_limit_ms} мс</span>
-        <span>Память: {problem.memory_limit_mb} МБ</span>
-        {problem.url && (
-          <a href={problem.url} target="_blank" rel="noreferrer" className="ml-3 text-indigo-600 underline">
-            Codeforces ↗
-          </a>
-        )}
+    <article className="space-y-6">
+      <div>
+        <Link href="/problems" className="link text-sm">← Задачи</Link>
+        <div className="mt-2 flex items-center gap-2">
+          <h1 className="page-title">{problem.title}</h1>
+          {problem.solved && <span className="badge badge-success">✓ решено</span>}
+        </div>
+        <div className="muted mt-2 flex flex-wrap gap-3 text-sm">
+          {problem.rating && <span className="badge">рейтинг {problem.rating}</span>}
+          <span className="badge">⏱ {problem.time_limit_ms} мс</span>
+          <span className="badge">🧠 {problem.memory_limit_mb} МБ</span>
+          {problem.tags.map((t) => <span key={t} className="badge badge-primary">{t}</span>)}
+          {problem.url && <a href={problem.url} target="_blank" rel="noreferrer" className="link">Codeforces ↗</a>}
+        </div>
       </div>
 
-      {problem.statement_md && <Markdown>{problem.statement_md}</Markdown>}
+      {problem.statement_md && <div className="card p-6"><Markdown>{problem.statement_md}</Markdown></div>}
 
       {problem.samples.length > 0 && (
-        <section className="mt-6">
-          <h2 className="mb-2 text-lg font-semibold">Примеры</h2>
+        <section>
+          <h2 className="section-title mb-2">Примеры</h2>
           <div className="space-y-3">
             {problem.samples.map((s, i) => (
-              <div key={i} className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="mb-1 text-xs text-slate-500">Ввод</div>
-                  <pre className="rounded bg-slate-100 p-2 text-sm">{s.input}</pre>
+              <div key={i} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="card p-3">
+                  <div className="muted mb-1 text-xs">Ввод</div>
+                  <pre className="overflow-auto text-sm">{s.input}</pre>
                 </div>
-                <div>
-                  <div className="mb-1 text-xs text-slate-500">Вывод</div>
-                  <pre className="rounded bg-slate-100 p-2 text-sm">{s.expected_output}</pre>
+                <div className="card p-3">
+                  <div className="muted mb-1 text-xs">Вывод</div>
+                  <pre className="overflow-auto text-sm">{s.expected_output}</pre>
                 </div>
               </div>
             ))}
@@ -67,8 +69,8 @@ export default function ProblemPage({ params }: { params: { id: string } }) {
       )}
 
       {user.role === "student" && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">Решение</h2>
+        <section>
+          <h2 className="section-title mb-3">Решение</h2>
           <SubmitPanel problemId={problem.id} />
         </section>
       )}
