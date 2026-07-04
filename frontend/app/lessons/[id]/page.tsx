@@ -11,6 +11,15 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { LessonDetail } from "@/lib/types";
 
+// Первый пример кода из урока → стартовый код песочницы (и её язык).
+function firstCodeBlock(md: string): { code: string; language: "python" | "cpp" } {
+  const m = md.match(/```(\w+)?\n([\s\S]*?)```/);
+  if (!m) return { code: 'print("Привет, мир!")', language: "python" };
+  const lang = (m[1] || "").toLowerCase();
+  const language = ["cpp", "c++", "cc", "cxx", "c"].includes(lang) ? "cpp" : "python";
+  return { code: m[2].replace(/\n+$/, ""), language };
+}
+
 export default function LessonPage({ params }: { params: { id: string } }) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -41,11 +50,20 @@ export default function LessonPage({ params }: { params: { id: string } }) {
         <Markdown>{lesson.content_md}</Markdown>
       </div>
 
-      <section>
-        <h2 className="section-title mb-1">Песочница</h2>
-        <p className="muted mb-3 text-sm">Запустите Python прямо в браузере (Pyodide).</p>
-        <CodeRunner initialCode={'print("Привет, мир!")'} language="python" />
-      </section>
+      {(() => {
+        const sample = firstCodeBlock(lesson.content_md);
+        return (
+          <section>
+            <h2 className="section-title mb-1">Песочница</h2>
+            <p className="muted mb-3 text-sm">
+              {sample.language === "python"
+                ? "Запустите Python прямо в браузере (Pyodide) — меняйте код и экспериментируйте."
+                : "Редактируйте пример на C++. Запуск и проверка C++ — в разделе «Задачи» (серверный sandbox)."}
+            </p>
+            <CodeRunner initialCode={sample.code} language={sample.language} />
+          </section>
+        );
+      })()}
 
       {user.role === "student" && (
         <section>
