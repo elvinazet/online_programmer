@@ -39,7 +39,15 @@ export default function ProblemsPage() {
 
   return (
     <div>
-      <PageHeader title="Задачи" subtitle="Практика с проверкой в изолированном sandbox" />
+      <PageHeader
+        title="Задачи"
+        subtitle="Практика с проверкой в изолированном sandbox"
+        actions={
+          user.role === "teacher" ? (
+            <Link href="/problems/new" className="btn btn-primary btn-sm">+ Создать задачу</Link>
+          ) : undefined
+        }
+      />
 
       <div className="card mb-5 flex flex-wrap items-end gap-2 p-4">
         <input placeholder="теги через запятую" value={tags} onChange={(e) => setTags(e.target.value)} className="input flex-1" style={{ minWidth: "10rem" }} />

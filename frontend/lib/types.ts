@@ -60,6 +60,17 @@ export interface PublicQuestion {
   options?: string[] | null;
 }
 
+export interface TeacherQuestion {
+  id: number;
+  module_id: number;
+  type: QuestionType;
+  prompt_md: string;
+  options?: string[] | null;
+  correct_answer: Record<string, unknown>;
+  explanation_md?: string | null;
+  difficulty?: number | null;
+}
+
 export interface LessonDetail {
   id: number;
   module_id: number;

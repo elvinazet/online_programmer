@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
+import TeacherContent from "@/components/TeacherContent";
 import { useToast } from "@/components/Toast";
 import { PageHeader, PageLoader } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -172,6 +173,11 @@ export default function TeachPage() {
               ))}
             </div>
           </section>
+
+          <div>
+            <h2 className="section-title mb-2">Вопросы и квизы</h2>
+            <TeacherContent tree={tree} />
+          </div>
         </>
       )}
     </div>
