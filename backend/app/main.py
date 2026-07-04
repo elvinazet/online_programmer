@@ -22,6 +22,14 @@ from app.core.middleware import AuthRateLimitMiddleware
 from app.db.session import engine
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("app")
+
+# Защита от небезопасного деплоя: не оставляйте дефолтный/короткий JWT-секрет.
+if settings.jwt_secret == "change-me-in-.env" or len(settings.jwt_secret) < 32:
+    message = "JWT_SECRET не задан или слишком короткий — токены можно подделать. Задайте длинный случайный секрет в .env."
+    if settings.environment == "production":
+        raise RuntimeError(message)
+    logger.warning(message)
 
 app = FastAPI(title=settings.app_name)
 
