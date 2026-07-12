@@ -5,6 +5,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Submission, SubmissionStatus } from "@/lib/types";
 
+import "./monacoLoader";
 import { Spinner } from "./ui";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });

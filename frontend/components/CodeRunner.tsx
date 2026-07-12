@@ -3,11 +3,12 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Icon } from "./Icon";
+import "./monacoLoader";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
-const PYODIDE_VERSION = "v0.26.2";
-const PYODIDE_URL = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`;
+// Pyodide отдаётся со своего origin (public/pyodide), а не с CDN.
+const PYODIDE_URL = "/pyodide/";
 
 // Pyodide подгружается из CDN один раз и кэшируется на window.
 async function getPyodide(): Promise<any> {
@@ -18,7 +19,7 @@ async function getPyodide(): Promise<any> {
       const script = document.createElement("script");
       script.src = `${PYODIDE_URL}pyodide.js`;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Не удалось загрузить Pyodide (нужен интернет)"));
+      script.onerror = () => reject(new Error("Не удалось загрузить Pyodide"));
       document.head.appendChild(script);
     });
   }

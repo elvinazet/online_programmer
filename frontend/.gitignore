@@ -1,6 +1,10 @@
 /node_modules
 /.next
 /out
+# Self-hosted редактор/рантайм — копируются из node_modules при сборке
+# (scripts/copy-editor-assets.mjs), не коммитятся.
+/public/monaco
+/public/pyodide
 next-env.d.ts
 *.tsbuildinfo
 .env.local

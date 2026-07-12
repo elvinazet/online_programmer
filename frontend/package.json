@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "setup:assets": "node scripts/copy-editor-assets.mjs",
+    "predev": "node scripts/copy-editor-assets.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-editor-assets.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,7 +14,9 @@
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
     "highlight.js": "^11.10.0",
+    "monaco-editor": "^0.55.1",
     "next": "^14.2.35",
+    "pyodide": "^0.26.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
