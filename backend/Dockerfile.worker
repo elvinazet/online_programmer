@@ -5,14 +5,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Docker CLI (статический бинарник): worker запускает sandbox-контейнеры
-# через смонтированный docker.sock (sibling-контейнеры на хосте).
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
-    && curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz \
-       | tar xz --strip-components=1 -C /usr/local/bin docker/docker \
-    && apt-get purge -y curl && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+# Docker CLI для запуска sandbox-контейнеров через смонтированный docker.sock
+# (sibling-контейнеры на хосте). Берём готовый бинарник из официального образа
+# docker:cli (реестр docker.io) — не тянем с download.docker.com, который
+# недоступен в закрытых сетях.
+COPY --from=docker:27-cli /usr/local/bin/docker /usr/local/bin/docker
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
